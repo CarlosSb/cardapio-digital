@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, Menu, Tags, QrCode, LogOut, ChefHat } from "lucide-react"
+import { Building2, Home, Menu, Tags, QrCode, LogOut, ChefHat } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -15,6 +15,11 @@ import {
 import { Button } from "@/components/ui/button"
 
 const menuItems = [
+  {
+    title: "Início",
+    icon: Home,
+    url: "/dashboard",
+  },
   {
     title: "Restaurante",
     url: "/dashboard/restaurant",
