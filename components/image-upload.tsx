@@ -68,8 +68,8 @@ export function ImageUpload({ value, onChange, label = "Upload Image", className
 
       {preview ? (
         <div className="mt-2 relative">
-          <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
-            <img src={preview || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
+          <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+            <img src={preview || "/placeholder.svg"} alt="Preview" className="max-h-full max-w-full object-contain mx-auto" />
             <Button
               type="button"
               variant="destructive"

@@ -1,7 +1,7 @@
 import { requireAuth } from "@/lib/auth"
 import { sql } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Building2, Tags, Menu, QrCode, Home } from "lucide-react"
+import { Building2, Tags, Menu, QrCode } from "lucide-react"
 import Link from "next/link"
 
 export default async function DashboardPage() {

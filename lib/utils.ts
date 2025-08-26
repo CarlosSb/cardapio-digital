@@ -11,3 +11,8 @@ export async function hashPassword(password: string): Promise<string> {
   return await bcrypt.hash(password, saltRounds)
 }
 
+//aplica um deley na requisição
+export function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+

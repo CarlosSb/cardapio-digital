@@ -1,12 +1,16 @@
 import { requireAuth } from "@/lib/auth"
-import { sql } from "@/lib/db"
+import { Category, sql } from "@/lib/db"
 import { CategoriesTable } from "@/components/categories-table"
 import { CategoryForm } from "@/components/category-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { delay } from "@/lib/utils"
 
 export default async function CategoriesPage() {
   const user = await requireAuth()
+
+
+  await delay(3000);
 
   // Get user's restaurant
   const restaurants = await sql`
@@ -40,7 +44,7 @@ export default async function CategoriesPage() {
     SELECT * FROM categories 
     WHERE restaurant_id = ${restaurant.id}
     ORDER BY display_order ASC, created_at DESC
-  `
+  ` as Category[];
 
   return (
     <div className="space-y-6">
