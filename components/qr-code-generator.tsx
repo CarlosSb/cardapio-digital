@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Download, QrCode, Copy, Check } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import { downloadQRCodeHighRes } from "@/lib/utils"
 
 interface QRCodeGeneratorProps {
   restaurantSlug: string
@@ -17,6 +18,7 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName, menuUrl }: QRC
   const [isGenerating, setIsGenerating] = useState(false)
   const [copied, setCopied] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   const generateQRCode = async (menuUrl: string) => {
     setIsGenerating(true)
@@ -51,20 +53,22 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName, menuUrl }: QRC
     }
   }
 
-  const downloadQRCode = () => {
-    if (!qrCodeDataUrl) return
+  const downloadQRCode = async () => {
+    setIsDownloading(true)
+    try {
+      if (!qrCodeDataUrl) return
+      await downloadQRCodeHighRes(menuUrl, restaurantSlug)
 
-    const link = document.createElement("a")
-    link.download = `qr-code-${restaurantSlug}.png`
-    link.href = qrCodeDataUrl
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-
-    toast({
-      title: "Download iniciado",
-      description: "O QR code foi baixado com sucesso!",
-    })
+    } catch (error) {
+      console.error("Error downloading QR code:", error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível baixar o QR code. Tente novamente.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
   const copyUrl = async (menuUrl: string) => {
@@ -84,7 +88,6 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName, menuUrl }: QRC
       })
     }
   }
-
 
   useEffect(() => {
     if (restaurantSlug && menuUrl) {
@@ -129,9 +132,9 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName, menuUrl }: QRC
             {isGenerating ? "Gerando..." : "Regenerar QR Code"}
           </Button>
 
-          <Button onClick={downloadQRCode} disabled={!qrCodeDataUrl || isGenerating} className="flex-1">
+          <Button onClick={() => downloadQRCode()} disabled={!qrCodeDataUrl || isGenerating || isDownloading} className="flex-1">
             <Download className="h-4 w-4 mr-2" />
-            Baixar PNG
+            {isDownloading ? "Baixando..." : "Baixar PNG"}
           </Button>
         </div>
 
