@@ -4,13 +4,9 @@ import { CategoriesTable } from "@/components/categories-table"
 import { CategoryForm } from "@/components/category-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { delay } from "@/lib/utils"
 
 export default async function CategoriesPage() {
   const user = await requireAuth()
-
-
-  await delay(3000);
 
   // Get user's restaurant
   const restaurants = await sql`
