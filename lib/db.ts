@@ -52,6 +52,10 @@ export interface User {
   raw_json: any
 }
 
+export interface MenuItemWithCategory extends MenuItem {
+  category_name: string
+}
+
 export async function getRestaurantByOwner(ownerEmail: string): Promise<Restaurant | null> {
   try {
     const result = await sql`

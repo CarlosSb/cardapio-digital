@@ -9,17 +9,16 @@ import { toast } from "@/hooks/use-toast"
 interface QRCodeGeneratorProps {
   restaurantSlug: string
   restaurantName: string
+  menuUrl: string
 }
 
-export function QRCodeGenerator({ restaurantSlug, restaurantName }: QRCodeGeneratorProps) {
+export function QRCodeGenerator({ restaurantSlug, restaurantName, menuUrl }: QRCodeGeneratorProps) {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [copied, setCopied] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const menuUrl = `${window.location.origin}/menu/${restaurantSlug}`
-
-  const generateQRCode = async () => {
+  const generateQRCode = async (menuUrl: string) => {
     setIsGenerating(true)
     try {
       // Dynamic import to avoid SSR issues
@@ -29,7 +28,7 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName }: QRCodeGenera
       if (!canvas) return
 
       await QRCode.toCanvas(canvas, menuUrl, {
-        width: 300,
+        width: 175,
         margin: 2,
         color: {
           dark: "#0891b2", // cyan-600
@@ -68,7 +67,7 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName }: QRCodeGenera
     })
   }
 
-  const copyUrl = async () => {
+  const copyUrl = async (menuUrl: string) => {
     try {
       await navigator.clipboard.writeText(menuUrl)
       setCopied(true)
@@ -86,9 +85,12 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName }: QRCodeGenera
     }
   }
 
+
   useEffect(() => {
-    generateQRCode()
-  }, [restaurantSlug])
+    if (restaurantSlug && menuUrl) {
+      generateQRCode(menuUrl)
+    }
+  }, [restaurantSlug, menuUrl])
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -100,9 +102,9 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName }: QRCodeGenera
         <CardDescription>Compartilhe este QR code para que os clientes acessem seu cardápio digital</CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 h-full">
         <div className="flex justify-center">
-          <div className="p-4 bg-white rounded-lg border-2 border-gray-200">
+          <div className="p-4 mb-2 bg-white rounded-lg border-2 border-gray-200 w-48 h-48 relative flex items-center justify-center">
             <canvas ref={canvasRef} className={`${isGenerating ? "opacity-50" : "opacity-100"} transition-opacity`} />
             {isGenerating && (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -116,14 +118,14 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName }: QRCodeGenera
           <p className="text-sm font-medium text-gray-700">URL do Cardápio:</p>
           <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
             <code className="flex-1 text-xs text-gray-600 truncate">{menuUrl}</code>
-            <Button variant="ghost" size="sm" onClick={copyUrl} className="h-8 w-8 p-0">
+            <Button variant="ghost" size="sm" onClick={() => copyUrl(menuUrl)} className="h-8 w-8 p-0">
               {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={generateQRCode} disabled={isGenerating} variant="outline" className="flex-1 bg-transparent">
+          <Button onClick={() => generateQRCode(menuUrl)} disabled={isGenerating} variant="outline" className="flex-1 bg-transparent">
             {isGenerating ? "Gerando..." : "Regenerar QR Code"}
           </Button>
 

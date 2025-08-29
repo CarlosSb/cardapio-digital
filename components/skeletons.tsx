@@ -1,6 +1,8 @@
+import { Label } from "@radix-ui/react-label";
+
 // Loading animation
-const shimmer =
-  'before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent';
+export const shimmer =
+  'relative overflow-hidden before:content-[""] before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent';
 
   export function TextSkeleton(props: React.HTMLAttributes<HTMLDivElement>) {
   return (
@@ -11,7 +13,7 @@ const shimmer =
 export function CardSkeleton() {
   return (
     <div
-      className={`${shimmer} relative overflow-hidden rounded-xl bg-gray-100 p-2 shadow-sm`}
+      className={`${shimmer} relative overflow-hidden rounded-xl bg-gray-100 p-2 shadow-sm `}
     >
       <div className="flex p-4">
         <div className="h-5 w-5 rounded-md bg-gray-200" />
@@ -183,4 +185,34 @@ export function CategoryTableSkeleton() {
       </div>
     </div>
   );
+}
+
+export function FormRestaurantSkeleton() {
+return (
+    <main className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="name">Nome do Restaurante</Label>
+          <TextSkeleton className="h-6" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="slug">Slug (URL)</Label>
+          <TextSkeleton className="h-6" />
+
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description">Descrição</Label>
+        <TextSkeleton className="h-18" />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="logo">Logo</Label>
+        <TextSkeleton className="h-48" />
+      </div>
+
+      <TextSkeleton className="h-8" />
+    </main>
+  )
 }

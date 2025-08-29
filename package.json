@@ -40,6 +40,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^3.0.0",
+    "@types/qrcode": "^1.5.5",
     "@vercel/blob": "latest",
     "autoprefixer": "^10.4.20",
     "bcryptjs": "^3.0.2",

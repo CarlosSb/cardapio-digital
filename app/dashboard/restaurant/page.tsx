@@ -2,9 +2,12 @@ import { requireAuth } from "@/lib/auth"
 import { sql } from "@/lib/db"
 import { RestaurantForm } from "@/components/restaurant-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { delay } from "@/lib/utils"
 
 export default async function RestaurantPage() {
   const user = await requireAuth()
+
+   await delay(3000);
 
   // Get user's restaurant
   const restaurants = await sql`
