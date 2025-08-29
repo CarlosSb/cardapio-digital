@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Download, QrCode, Copy, Check } from "lucide-react"
@@ -10,15 +10,20 @@ import { downloadQRCodeHighRes } from "@/lib/utils"
 interface QRCodeGeneratorProps {
   restaurantSlug: string
   restaurantName: string
-  menuUrl: string
 }
 
-export function QRCodeGenerator({ restaurantSlug, restaurantName, menuUrl }: QRCodeGeneratorProps) {
+export function QRCodeGenerator({ restaurantSlug, restaurantName }: QRCodeGeneratorProps) {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [copied, setCopied] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDownloading, setIsDownloading] = useState(false)
+
+ const [menuUrl, setMenuUrl] = useState('');
+
+  useEffect(() => {
+    setMenuUrl(`${window.location.origin}/menu/${restaurantSlug}`);
+  }, [restaurantSlug]);
 
   const generateQRCode = async (menuUrl: string) => {
     setIsGenerating(true)
