@@ -1,9 +1,10 @@
 import { requireAuth } from "@/lib/auth"
-import { sql } from "@/lib/db"
+import { Category, MenuItemWithCategory, sql } from "@/lib/db"
 import { MenuItemsTable } from "@/components/menu-items-table"
 import { MenuItemForm } from "@/components/menu-item-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { delay } from "@/lib/utils"
 
 export default async function MenuItemsPage() {
   const user = await requireAuth()
@@ -41,14 +42,14 @@ export default async function MenuItemsPage() {
       SELECT * FROM categories 
       WHERE restaurant_id = ${restaurant.id}
       ORDER BY display_order ASC
-    `,
+    ` as unknown as Promise<Category[]>,
     sql`
       SELECT m.*, c.name as category_name 
       FROM menu_items m
       LEFT JOIN categories c ON m.category_id = c.id
       WHERE m.restaurant_id = ${restaurant.id}
       ORDER BY c.display_order ASC, m.display_order ASC, m.created_at DESC
-    `,
+    ` as unknown as Promise<MenuItemWithCategory[]>,
   ])
 
   return (

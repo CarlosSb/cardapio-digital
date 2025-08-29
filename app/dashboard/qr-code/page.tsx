@@ -4,8 +4,13 @@ import { getRestaurantByOwner } from "@/lib/db"
 import { QRCodeGenerator } from "@/components/qr-code-generator"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { QrCode, Smartphone, Users, Zap } from "lucide-react"
+import getOriginUrl from "@/lib/utils"
+import { headers } from "next/headers"
+
+
 
 export default async function QRCodePage() {
+
   const user = await getUser()
   if (!user) {
     redirect("/login")
@@ -16,6 +21,9 @@ export default async function QRCodePage() {
     redirect("/dashboard/restaurant")
   }
 
+  const originUrl = getOriginUrl(headers)
+  const menuUrl = `${originUrl}/menu/${restaurant.slug || ""}`
+
   return (
     <div className="space-y-6">
       <div>
@@ -25,7 +33,7 @@ export default async function QRCodePage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-6">
-          <QRCodeGenerator restaurantSlug={restaurant.slug} restaurantName={restaurant.name} />
+            <QRCodeGenerator restaurantSlug={restaurant.slug} restaurantName={restaurant.name}  menuUrl={menuUrl} />
         </div>
 
         <div className="space-y-4">
