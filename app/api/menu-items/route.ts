@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { requireAuth } from "@/lib/auth"
 import { sql } from "@/lib/db"
+import { canAddMenuItem } from "@/lib/plan-limits"
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,6 +24,15 @@ export async function POST(request: NextRequest) {
 
     if (restaurants.length === 0) {
       return NextResponse.json({ success: false, error: "Restaurante não encontrado" }, { status: 404 })
+    }
+
+    // Check plan limits
+    const canAdd = await canAddMenuItem(restaurant_id)
+    if (!canAdd) {
+      return NextResponse.json({
+        success: false,
+        error: "Limite de itens do cardápio atingido. Faça upgrade do seu plano para adicionar mais itens."
+      }, { status: 403 })
     }
 
     // Verify category belongs to restaurant

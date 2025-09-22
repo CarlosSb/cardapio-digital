@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 
-export function LoginForm() {
+export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
@@ -21,14 +21,22 @@ export function LoginForm() {
     setError("")
 
     const formData = new FormData(e.currentTarget)
+    const name = formData.get("name") as string
     const email = formData.get("email") as string
     const password = formData.get("password") as string
+    const confirmPassword = formData.get("confirmPassword") as string
+
+    if (password !== confirmPassword) {
+      setError("As senhas não coincidem")
+      setIsLoading(false)
+      return
+    }
 
     try {
-      const response = await fetch("/api/auth/signin", {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       })
 
       const result = await response.json()
@@ -37,7 +45,7 @@ export function LoginForm() {
         router.push("/dashboard")
         router.refresh()
       } else {
-        setError(result.error || "Erro ao fazer login")
+        setError(result.error || "Erro ao criar conta")
       }
     } catch (error) {
       setError("Erro de conexão")
@@ -49,13 +57,24 @@ export function LoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Entrar</CardTitle>
+        <CardTitle>Criar Conta</CardTitle>
         <CardDescription>
-          Digite suas credenciais para acessar sua conta
+          Preencha os dados abaixo para criar sua conta
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome Completo</Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Seu nome completo"
+              required
+              disabled={isLoading}
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -76,6 +95,19 @@ export function LoginForm() {
               placeholder="••••••••"
               required
               disabled={isLoading}
+              minLength={6}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              required
+              disabled={isLoading}
+              minLength={6}
             />
           </div>
 
@@ -87,14 +119,14 @@ export function LoginForm() {
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Entrar
+            Criar Conta
           </Button>
         </form>
 
         <div className="mt-6 text-center text-sm">
-          <span className="text-muted-foreground">Não tem uma conta? </span>
-          <Link href="/signup" className="text-primary hover:underline">
-            Criar conta
+          <span className="text-muted-foreground">Já tem uma conta? </span>
+          <Link href="/login" className="text-primary hover:underline">
+            Fazer login
           </Link>
         </div>
       </CardContent>

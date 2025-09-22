@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/login", "/api/auth/signin", "/api/auth/signup"]
+  const publicRoutes = ["/login", "/signup", "/api/auth/signin", "/api/auth/signup"]
 
   // Menu routes are public (for QR code access)
   const isMenuRoute = pathname.startsWith("/menu/")
