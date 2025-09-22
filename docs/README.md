@@ -27,6 +27,7 @@ Este projeto é uma aplicação web moderna que permite aos restaurantes criar e
 - [🗄️ Banco de Dados](database-schema.md) - Estrutura do banco de dados
 - [⚙️ Instalação](installation.md) - Guia de instalação e configuração
 - [❓ FAQ](faq.md) - Perguntas frequentes e soluções
+- [🚀 Plano de Melhorias](improvement-plan.md) - Análise completa e roadmap de melhorias
 
 ## 🚀 Tecnologias Utilizadas
 

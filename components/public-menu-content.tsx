@@ -39,26 +39,38 @@ export function PublicMenuContent({ restaurant, menuByCategory }: PublicMenuCont
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Category Filter */}
+      {/* Category Filter Moderno */}
       {availableCategories.length > 1 && (
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-2 justify-center">
-            <Button
-              variant={selectedCategory === null ? "default" : "outline"}
+        <div className="mb-12">
+          <div className="flex flex-wrap gap-3 justify-center">
+            <button
               onClick={() => setSelectedCategory(null)}
-              className="rounded-full"
+              className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedCategory === null
+                  ? "bg-primary text-primary-foreground shadow-lg transform scale-105"
+                  : "bg-card hover:bg-accent hover:text-accent-foreground border border-border hover:border-primary/30 hover:shadow-md"
+              }`}
             >
-              Todos
-            </Button>
+              <span>Todos os itens</span>
+              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs bg-white/20 rounded-full">
+                {menuByCategory.reduce((acc, cat) => acc + cat.items.length, 0)}
+              </span>
+            </button>
             {availableCategories.map((category) => (
-              <Button
+              <button
                 key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
                 onClick={() => setSelectedCategory(category.id)}
-                className="rounded-full"
+                className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
+                  selectedCategory === category.id
+                    ? "bg-primary text-primary-foreground shadow-lg transform scale-105"
+                    : "bg-card hover:bg-accent hover:text-accent-foreground border border-border hover:border-primary/30 hover:shadow-md"
+                }`}
               >
-                {category.name}
-              </Button>
+                <span>{category.name}</span>
+                <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs bg-white/20 rounded-full">
+                  {category.items.length}
+                </span>
+              </button>
             ))}
           </div>
         </div>
@@ -70,60 +82,116 @@ export function PublicMenuContent({ restaurant, menuByCategory }: PublicMenuCont
           if (category.items.length === 0) return null
 
           return (
-            <section key={category.id} className="space-y-6">
-              {/* Category Header */}
-              <div className="text-center space-y-2">
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground">{category.name}</h2>
-                {category.description && (
-                  <p className="text-muted-foreground max-w-2xl mx-auto">{category.description}</p>
-                )}
+            <section key={category.id} className="space-y-8">
+              {/* Category Header Moderno */}
+              <div className="text-center space-y-4">
+                <div className="inline-flex items-center gap-3">
+                  <div className="w-1 h-8 bg-gradient-to-b from-primary to-accent rounded-full" />
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                      {category.name}
+                    </h2>
+                    {category.description && (
+                      <p className="text-muted-foreground text-base max-w-2xl mx-auto mt-2">
+                        {category.description}
+                      </p>
+                    )}
+                  </div>
+                  <div className="w-1 h-8 bg-gradient-to-b from-accent to-primary rounded-full" />
+                </div>
+
+                {/* Contador de itens */}
+                <div className="inline-flex items-center gap-2 bg-muted/50 rounded-full px-4 py-2">
+                  <span className="text-sm text-muted-foreground">
+                    {category.items.length} {category.items.length === 1 ? 'item' : 'itens'}
+                  </span>
+                </div>
               </div>
 
-              {/* Menu Items Grid */}
+              {/* Menu Items Grid Moderno */}
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {category.items.map((item) => (
-                  <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    {/* Item Image */}
-                    <div className="aspect-video bg-card relative overflow-hidden">
+                {category.items.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="group card-modern overflow-hidden animate-scale-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    {/* Item Image Moderno */}
+                    <div className="aspect-[4/3] relative overflow-hidden">
                       {item.image_url ? (
-                        <img
-                          src={item.image_url || "/placeholder.svg"}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement
-                            target.style.display = "none"
-                            target.nextElementSibling?.classList.remove("hidden")
-                          }}
-                        />
-                      ) : null}
-                      <div
-                        className={`${
-                          item.image_url ? "hidden" : "flex"
-                        } absolute inset-0 items-center justify-center bg-card`}
-                      >
-                        <div className="text-center space-y-2">
-                          <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto" />
-                          <ChefHat className="h-6 w-6 text-muted-foreground mx-auto" />
+                        <>
+                          <img
+                            src={item.image_url || "/placeholder.svg"}
+                            alt={item.name}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement
+                              target.style.display = "none"
+                              target.nextElementSibling?.classList.remove("hidden")
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </>
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                          <div className="text-center space-y-3">
+                            <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                              <ChefHat className="h-8 w-8 text-primary" />
+                            </div>
+                            <p className="text-sm text-muted-foreground font-medium">Sem imagem</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Badge de preço flutuante */}
+                      <div className="absolute top-3 right-3">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
+                          <span className="text-primary font-bold text-sm">
+                            {formatPrice(Number(item.price))}
+                          </span>
                         </div>
                       </div>
+
+                      {/* Overlay de indisponibilidade */}
+                      {!item.is_available && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2">
+                            <span className="text-destructive font-semibold text-sm">Indisponível</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    <CardContent className="p-4 space-y-3">
+                    <div className="p-5 space-y-3">
                       {/* Item Header */}
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-card-foreground leading-tight">{item.name}</h3>
-                        <Badge variant="secondary" className="shrink-0 font-bold">
-                          {formatPrice(Number(item.price))}
-                        </Badge>
+                      <div className="space-y-2">
+                        <h3 className="font-bold text-lg text-foreground leading-tight group-hover:text-primary transition-colors duration-200">
+                          {item.name}
+                        </h3>
+
+                        {/* Item Description */}
+                        {item.description && (
+                          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+                            {item.description}
+                          </p>
+                        )}
                       </div>
 
-                      {/* Item Description */}
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-                      )}
-                    </CardContent>
-                  </Card>
+                      {/* Badge de categoria */}
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                          {category.name}
+                        </span>
+
+                        {item.is_available && (
+                          <div className="flex items-center gap-1 text-green-600">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                            <span className="text-xs font-medium">Disponível</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </section>
@@ -149,11 +217,31 @@ export function PublicMenuContent({ restaurant, menuByCategory }: PublicMenuCont
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="mt-16 pt-8 border-t border-border text-center">
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">Cardápio Digital - {restaurant.name}</p>
-          <p className="text-xs text-muted-foreground">Atualizado em {new Date().toLocaleDateString("pt-BR")}</p>
+      {/* Footer Moderno */}
+      <footer className="mt-20 pt-12 border-t border-border/50">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-6 py-3 border border-primary/20">
+            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+            <p className="text-sm font-medium text-foreground">
+              Cardápio Digital - {restaurant.name}
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Atualizado em {new Date().toLocaleDateString("pt-BR", {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </p>
+
+          {/* Call to action sutil */}
+          <div className="pt-4">
+            <p className="text-xs text-muted-foreground/80">
+              🍽️ Bom apetite! | 📱 Peça pelo WhatsApp
+            </p>
+          </div>
         </div>
       </footer>
     </div>
