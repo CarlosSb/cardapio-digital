@@ -14,6 +14,7 @@ export interface Restaurant {
   slug: string
   owner_email: string
   logo_url: string | null
+  menu_display_mode: 'grid' | 'list'
   created_at: Date
   updated_at: Date
 }

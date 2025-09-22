@@ -40,6 +40,22 @@ export async function requireAuth(): Promise<AuthUser> {
   return user
 }
 
+export async function requireAdmin(): Promise<AuthUser> {
+  const user = await getUser()
+  if (!user) {
+    redirect("/login")
+  }
+
+  // For now, check if user email is in admin list
+  // TODO: Create proper admin role system
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',') || ['admin@cardapiodigital.com']
+  if (!adminEmails.includes(user.email)) {
+    redirect("/dashboard")
+  }
+
+  return user
+}
+
 export async function signIn(email: string, password: string): Promise<{ success: boolean; error?: string }> {
   try {
     const users = await sql`

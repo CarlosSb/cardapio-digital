@@ -7,8 +7,6 @@ import { delay } from "@/lib/utils"
 export default async function RestaurantPage() {
   const user = await requireAuth()
 
-   await delay(3000);
-
   // Get user's restaurant
   const restaurants = await sql`
     SELECT * FROM restaurants 

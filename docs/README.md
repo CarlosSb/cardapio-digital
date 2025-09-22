@@ -34,7 +34,42 @@ Este projeto é uma aplicação web moderna que permite aos restaurantes criar e
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Styling**: Tailwind CSS, Radix UI Components
 - **Backend**: Next.js API Routes
-- **Banco de Dados**: PostgreSQL (Neon)
+- **Banco de Dados**: PostgreSQL (Neon) + Drizzle ORM
 - **Autenticação**: Cookies-based authentication
 - **Upload**: Vercel Blob Storage
 - **QR Code**: QRCode library
+- **ORM**: Drizzle (TypeScript-native)
+
+## 🗄️ Configuração do Banco de Dados
+
+### Reset Completo (Recomendado)
+Para começar do zero com dados de exemplo:
+
+```bash
+# Reset completo do banco com dados fictícios
+npm run db:reset
+```
+
+Este comando:
+- ✅ Remove todas as tabelas existentes
+- ✅ Cria todas as tabelas do zero
+- ✅ Popula com dados de exemplo
+- ✅ Cria usuário admin e restaurantes
+
+### Migração Gradual (Avançado)
+Se preferir manter dados existentes:
+
+```bash
+# Scripts individuais (executar nesta ordem)
+psql $DATABASE_URL -f scripts/002-add-menu-display-mode.sql
+psql $DATABASE_URL -f scripts/003-create-analytics-tables.sql
+psql $DATABASE_URL -f scripts/004-seed-data.sql
+
+# Seed adicional via Drizzle
+npm run db:seed
+```
+
+### Usuário Admin
+- **Email**: admin@cardapiodigital.com
+- **Acesso**: /admin (painel administrativo da plataforma)
+- **Senha**: Qualquer senha (sistema de exemplo)
