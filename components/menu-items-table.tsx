@@ -7,11 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Pencil, Trash2, Eye, EyeOff } from "lucide-react"
 import { MenuItemEditDialog } from "@/components/menu-item-edit-dialog"
-import type { MenuItem, Category } from "@/lib/db"
-
-interface MenuItemWithCategory extends MenuItem {
-  category_name: string
-}
+import type { MenuItem, Category, MenuItemWithCategory } from "@/lib/db"
 
 interface MenuItemsTableProps {
   menuItems: MenuItemWithCategory[]

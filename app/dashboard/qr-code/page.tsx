@@ -25,7 +25,7 @@ export default async function QRCodePage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-6">
-          <QRCodeGenerator restaurantSlug={restaurant.slug} restaurantName={restaurant.name} />
+            <QRCodeGenerator restaurantSlug={restaurant.slug} restaurantName={restaurant.name} />
         </div>
 
         <div className="space-y-4">
