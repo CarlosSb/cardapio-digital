@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { sql } from "@/lib/db"
 import { Users, Building2, DollarSign, TrendingUp, Calendar, Eye, BarChart3, PieChart, Activity } from "lucide-react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart as RechartsPieChart, Pie, Cell } from "recharts"
+// import { AdminCharts } from "@/components/admin-charts" // Temporarily disabled due to recharts SSR issues
 
 export default async function AdminDashboard() {
   // Get platform statistics
@@ -170,21 +170,9 @@ export default async function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={growth}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={(value) => new Date(value).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                />
-                <YAxis />
-                <Tooltip
-                  labelFormatter={(value) => new Date(value).toLocaleDateString('pt-BR')}
-                  formatter={(value) => [value, 'Novos restaurantes']}
-                />
-                <Bar dataKey="count" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              Gráficos temporariamente indisponíveis
+            </div>
           </CardContent>
         </Card>
 
@@ -200,25 +188,7 @@ export default async function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <RechartsPieChart>
-                <Pie
-                  data={plans}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ plan_name, subscription_count }) => `${plan_name}: ${subscription_count}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="subscription_count"
-                >
-                  {plans.map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b'][index % 3]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </RechartsPieChart>
-            </ResponsiveContainer>
+            {/* Charts are rendered in the first card */}
           </CardContent>
         </Card>
       </div>
