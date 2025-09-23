@@ -2,6 +2,40 @@ import { type NextRequest, NextResponse } from "next/server"
 import { requireAuth } from "@/lib/auth"
 import { sql } from "@/lib/db"
 
+export async function GET(request: NextRequest) {
+  try {
+    const user = await requireAuth()
+    const { searchParams } = new URL(request.url)
+    const ownerEmail = searchParams.get('owner_email')
+
+    // If owner_email is provided, filter by it (for admin viewing user restaurants)
+    // Otherwise, return user's own restaurants
+    const targetEmail = ownerEmail || user.email
+
+    const restaurants = await sql`
+      SELECT
+        id,
+        name,
+        slug,
+        description,
+        owner_email,
+        logo_url,
+        menu_display_mode,
+        is_blocked,
+        is_banned,
+        created_at
+      FROM restaurants
+      WHERE owner_email = ${targetEmail}
+      ORDER BY created_at DESC
+    `
+
+    return NextResponse.json({ success: true, restaurants })
+  } catch (error) {
+    console.error("Restaurant fetch error:", error)
+    return NextResponse.json({ success: false, error: "Erro interno do servidor" }, { status: 500 })
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth()

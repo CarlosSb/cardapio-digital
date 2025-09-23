@@ -9,6 +9,7 @@
     "start": "next start",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:moderation": "node scripts/migrate.js",
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "psql $DATABASE_URL -f scripts/reset-database.sql"
   },

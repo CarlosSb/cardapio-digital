@@ -25,7 +25,7 @@ export async function getUser(): Promise<AuthUser | null> {
       LIMIT 1
     `
 
-    return users[0] || null
+    return users[0] as AuthUser || null
   } catch (error) {
     console.error("Error fetching user:", error)
     return null
@@ -51,6 +51,37 @@ export async function requireAdmin(): Promise<AuthUser> {
   const adminEmails = process.env.ADMIN_EMAILS?.split(',') || ['admin@cardapiodigital.com']
   if (!adminEmails.includes(user.email)) {
     redirect("/dashboard")
+  }
+
+  return user
+}
+
+export async function requireSuperAdmin(): Promise<AuthUser> {
+  const user = await getUser()
+  if (!user) {
+    throw new Error("UNAUTHORIZED")
+  }
+
+  // Super admin check - more restrictive
+  const superAdminEmails = process.env.SUPER_ADMIN_EMAILS?.split(',') || ['admin@cardapiodigital.com']
+  if (!superAdminEmails.includes(user.email)) {
+    throw new Error("REQUIRES_SUPER_ADMIN")
+  }
+
+  return user
+}
+
+export async function requireAdminApi(): Promise<AuthUser> {
+  const user = await getUser()
+  if (!user) {
+    throw new Error("UNAUTHORIZED")
+  }
+
+  // For now, check if user email is in admin list
+  // TODO: Create proper admin role system
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',') || ['admin@cardapiodigital.com']
+  if (!adminEmails.includes(user.email)) {
+    throw new Error("FORBIDDEN")
   }
 
   return user
