@@ -1,12 +1,17 @@
 import { notFound } from "next/navigation"
 import { sql } from "@/lib/db"
 import { PublicMenuHeader } from "@/components/public-menu-header"
-import { PublicMenuContent } from "@/components/public-menu-content"
+import { PublicMenuWrapper } from "@/components/public-menu-wrapper"
 import type { Restaurant, Category, MenuItem } from "@/lib/db"
 
 interface MenuItemWithCategory extends MenuItem {
   category_name: string
   category_display_order: number
+  image_urls: string[] | null
+}
+
+interface CategoryWithItems extends Category {
+  items: MenuItemWithCategory[]
 }
 
 interface PublicMenuPageProps {
@@ -20,12 +25,10 @@ export default async function PublicMenuPage({ params }: PublicMenuPageProps) {
 
   // Get restaurant by slug
   const restaurants = await sql`
-    SELECT *, logo_url FROM restaurants 
+    SELECT *, logo_url FROM restaurants
     WHERE slug = ${slug}
     LIMIT 1
   `
-
-    console.log(restaurants)
 
   if (restaurants.length === 0) {
     notFound()
@@ -36,12 +39,12 @@ export default async function PublicMenuPage({ params }: PublicMenuPageProps) {
   // Get categories and menu items
   const [categories, menuItems] = await Promise.all([
     sql`
-      SELECT * FROM categories 
+      SELECT * FROM categories
       WHERE restaurant_id = ${restaurant.id}
       ORDER BY display_order ASC
     ` as unknown as Promise<Category[]>,
     sql`
-      SELECT 
+      SELECT
         m.*,
         c.name as category_name,
         c.display_order as category_display_order
@@ -61,7 +64,11 @@ export default async function PublicMenuPage({ params }: PublicMenuPageProps) {
   return (
     <div className="min-h-screen bg-background">
       <PublicMenuHeader restaurant={restaurant} />
-      <PublicMenuContent restaurant={restaurant} menuByCategory={menuByCategory} />
+      <PublicMenuWrapper
+        restaurant={restaurant}
+        menuByCategory={menuByCategory}
+        displayMode={restaurant.menu_display_mode}
+      />
     </div>
   )
 }

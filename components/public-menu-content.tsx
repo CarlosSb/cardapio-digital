@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChefHat, ImageIcon } from "lucide-react"
+import { ChefHat, ImageIcon, Grid3X3, List } from "lucide-react"
+import { ItemDetailModal } from "@/components/item-detail-modal"
 import type { Restaurant, Category, MenuItem } from "@/lib/db"
 
 interface MenuItemWithCategory extends MenuItem {
   category_name: string
   category_display_order: number
+  image_urls: string[] | null
 }
 
 interface CategoryWithItems extends Category {
@@ -19,10 +21,27 @@ interface CategoryWithItems extends Category {
 interface PublicMenuContentProps {
   restaurant: Restaurant
   menuByCategory: CategoryWithItems[]
+  displayMode?: 'grid' | 'list'
+  userDisplayMode?: 'grid' | 'list'
 }
 
-export function PublicMenuContent({ restaurant, menuByCategory }: PublicMenuContentProps) {
+export function PublicMenuContent({ restaurant, menuByCategory, displayMode = 'grid', userDisplayMode }: PublicMenuContentProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [currentDisplayMode, setCurrentDisplayMode] = useState<'grid' | 'list'>(userDisplayMode || displayMode)
+  const [selectedItem, setSelectedItem] = useState<MenuItemWithCategory | null>(null)
+
+  // Update display mode when userDisplayMode changes
+  useEffect(() => {
+    if (userDisplayMode) {
+      setCurrentDisplayMode(userDisplayMode)
+    }
+  }, [userDisplayMode])
+
+  // Save preference to localStorage
+  const handleDisplayModeChange = (mode: 'grid' | 'list') => {
+    setCurrentDisplayMode(mode)
+    localStorage.setItem(`menu-display-mode-${restaurant.slug}`, mode)
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -39,9 +58,9 @@ export function PublicMenuContent({ restaurant, menuByCategory }: PublicMenuCont
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Category Filter Moderno */}
-      {availableCategories.length > 1 && (
-        <div className="mb-12">
+      {/* Category Filter Moderno and Display Mode Toggle */}
+      <div className="mb-12 space-y-6">
+        {availableCategories.length > 1 && (
           <div className="flex flex-wrap gap-3 justify-center">
             <button
               onClick={() => setSelectedCategory(null)}
@@ -73,8 +92,36 @@ export function PublicMenuContent({ restaurant, menuByCategory }: PublicMenuCont
               </button>
             ))}
           </div>
+        )}
+
+        {/* Display Mode Toggle */}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-2 bg-card border border-border rounded-full p-1 shadow-sm">
+            <button
+              onClick={() => handleDisplayModeChange('grid')}
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                currentDisplayMode === 'grid'
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              <Grid3X3 className="h-4 w-4 mr-2" />
+              Grade
+            </button>
+            <button
+              onClick={() => handleDisplayModeChange('list')}
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                currentDisplayMode === 'list'
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              <List className="h-4 w-4 mr-2" />
+              Lista
+            </button>
+          </div>
         </div>
-      )}
+      </div>
 
       {/* Menu Categories */}
       <div className="space-y-12">
@@ -108,89 +155,179 @@ export function PublicMenuContent({ restaurant, menuByCategory }: PublicMenuCont
                 </div>
               </div>
 
-              {/* Menu Items Grid Moderno */}
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Menu Items - Grid ou List */}
+              <div className={currentDisplayMode === 'grid'
+                ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+                : "space-y-4"
+              }>
                 {category.items.map((item, index) => (
                   <div
                     key={item.id}
-                    className="group card-modern overflow-hidden animate-scale-in"
+                    className={`group overflow-hidden animate-scale-in cursor-pointer ${
+                      currentDisplayMode === 'grid'
+                        ? 'card-modern'
+                        : 'bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow'
+                    }`}
                     style={{ animationDelay: `${index * 100}ms` }}
+                    onClick={() => setSelectedItem(item)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSelectedItem(item)
+                      }
+                    }}
+                    aria-label={`Ver detalhes de ${item.name}`}
                   >
-                    {/* Item Image Moderno */}
-                    <div className="aspect-[4/3] relative overflow-hidden">
-                      {item.image_url ? (
-                        <>
-                          <img
-                            src={item.image_url || "/placeholder.svg"}
-                            alt={item.name}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.style.display = "none"
-                              target.nextElementSibling?.classList.remove("hidden")
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </>
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                          <div className="text-center space-y-3">
-                            <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-                              <ChefHat className="h-8 w-8 text-primary" />
+                    {currentDisplayMode === 'grid' ? (
+                      <>
+                        {/* Item Image Moderno - Grid Mode */}
+                        <div className="aspect-[4/3] relative overflow-hidden">
+                          {item.image_url ? (
+                            <>
+                              <img
+                                src={item.image_url || "/placeholder.svg"}
+                                alt={item.name}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement
+                                  target.style.display = "none"
+                                  target.nextElementSibling?.classList.remove("hidden")
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            </>
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                              <div className="text-center space-y-3">
+                                <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                                  <ChefHat className="h-8 w-8 text-primary" />
+                                </div>
+                                <p className="text-sm text-muted-foreground font-medium">Sem imagem</p>
+                              </div>
                             </div>
-                            <p className="text-sm text-muted-foreground font-medium">Sem imagem</p>
-                          </div>
-                        </div>
-                      )}
+                          )}
 
-                      {/* Badge de preço flutuante */}
-                      <div className="absolute top-3 right-3">
-                        <div className="bg-white/95 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
-                          <span className="text-primary font-bold text-sm">
-                            {formatPrice(Number(item.price))}
+                          {/* Badge de preço flutuante */}
+                          <div className="absolute top-3 right-3">
+                            <div className="bg-white/95 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
+                              <span className="text-primary font-bold text-sm">
+                                {formatPrice(Number(item.price))}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Overlay de indisponibilidade */}
+                          {!item.is_available && (
+                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                              <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2">
+                                <span className="text-destructive font-semibold text-sm">Indisponível</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+
+                    {currentDisplayMode === 'grid' ? (
+                      <div className="p-5 space-y-3">
+                        {/* Item Header */}
+                        <div className="space-y-2">
+                          <h3 className="font-bold text-lg text-foreground leading-tight group-hover:text-primary transition-colors duration-200">
+                            {item.name}
+                          </h3>
+
+                          {/* Item Description */}
+                          {item.description && (
+                            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Badge de categoria and Availability */}
+                        <div className="flex items-center justify-between">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                            {category.name}
                           </span>
+
+                          {item.is_available && (
+                            <div className="flex items-center gap-1 text-green-600">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                              <span className="text-xs font-medium">Disponível</span>
+                            </div>
+                          )}
                         </div>
                       </div>
+                    ) : (
+                      <div className="flex gap-4">
+                        {/* Item Image */}
+                        <div className="flex-shrink-0 w-20 h-20 relative overflow-hidden rounded-md">
+                          {item.image_url ? (
+                            <>
+                              <img
+                                src={item.image_url || "/placeholder.svg"}
+                                alt={item.name}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement
+                                  target.style.display = "none"
+                                  target.nextElementSibling?.classList.remove("hidden")
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            </>
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                              <div className="text-center">
+                                <div className="w-8 h-8 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                                  <ChefHat className="h-4 w-4 text-primary" />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
 
-                      {/* Overlay de indisponibilidade */}
-                      {!item.is_available && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                          <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2">
-                            <span className="text-destructive font-semibold text-sm">Indisponível</span>
+                        {/* Item Content */}
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-lg text-foreground leading-tight group-hover:text-primary transition-colors duration-200">
+                                {item.name}
+                              </h3>
+                              {item.description && (
+                                <p className="text-muted-foreground text-sm leading-relaxed line-clamp-1 mt-1">
+                                  {item.description}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex-shrink-0 ml-4">
+                              <div className="bg-primary/10 rounded-full px-3 py-1">
+                                <span className="text-primary font-bold text-sm">
+                                  {formatPrice(Number(item.price))}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                              {category.name}
+                            </span>
+
+                            {item.is_available && (
+                              <div className="flex items-center gap-1 text-green-600">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                <span className="text-xs font-medium">Disponível</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      )}
-                    </div>
-
-                    <div className="p-5 space-y-3">
-                      {/* Item Header */}
-                      <div className="space-y-2">
-                        <h3 className="font-bold text-lg text-foreground leading-tight group-hover:text-primary transition-colors duration-200">
-                          {item.name}
-                        </h3>
-
-                        {/* Item Description */}
-                        {item.description && (
-                          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
-                            {item.description}
-                          </p>
-                        )}
                       </div>
-
-                      {/* Badge de categoria */}
-                      <div className="flex items-center justify-between">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                          {category.name}
-                        </span>
-
-                        {item.is_available && (
-                          <div className="flex items-center gap-1 text-green-600">
-                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                            <span className="text-xs font-medium">Disponível</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -244,6 +381,13 @@ export function PublicMenuContent({ restaurant, menuByCategory }: PublicMenuCont
           </div>
         </div>
       </footer>
+
+      {/* Item Detail Modal */}
+      <ItemDetailModal
+        item={selectedItem}
+        isOpen={!!selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
     </div>
   )
 }

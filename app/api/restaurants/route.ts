@@ -5,7 +5,7 @@ import { sql } from "@/lib/db"
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth()
-    const { name, description, slug, logo_url, owner_email } = await request.json()
+    const { name, description, slug, logo_url, owner_email, menu_display_mode } = await request.json()
 
     if (!name || !slug) {
       return NextResponse.json({ success: false, error: "Nome e slug são obrigatórios" }, { status: 400 })
@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await sql`
-      INSERT INTO restaurants (id, name, description, slug, owner_email, logo_url, created_at, updated_at)
-      VALUES (gen_random_uuid(), ${name}, ${description}, ${slug}, ${owner_email}, ${logo_url}, NOW(), NOW())
+      INSERT INTO restaurants (id, name, description, slug, owner_email, logo_url, menu_display_mode, created_at, updated_at)
+      VALUES (gen_random_uuid(), ${name}, ${description}, ${slug}, ${owner_email}, ${logo_url}, ${menu_display_mode || 'grid'}, NOW(), NOW())
       RETURNING *
     `
 
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const user = await requireAuth()
-    const { id, name, description, slug, logo_url } = await request.json()
+    const { id, name, description, slug, logo_url, menu_display_mode } = await request.json()
 
     if (!id || !name || !slug) {
       return NextResponse.json({ success: false, error: "ID, nome e slug são obrigatórios" }, { status: 400 })
@@ -52,9 +52,9 @@ export async function PUT(request: NextRequest) {
     }
 
     const result = await sql`
-      UPDATE restaurants 
-      SET name = ${name}, description = ${description}, slug = ${slug}, 
-          logo_url = ${logo_url}, updated_at = NOW()
+      UPDATE restaurants
+      SET name = ${name}, description = ${description}, slug = ${slug},
+          logo_url = ${logo_url}, menu_display_mode = ${menu_display_mode}, updated_at = NOW()
       WHERE id = ${id} AND owner_email = ${user.email}
       RETURNING *
     `

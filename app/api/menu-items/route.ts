@@ -1,18 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { requireAuth } from "@/lib/auth"
 import { sql } from "@/lib/db"
+import { canAddMenuItem } from "@/lib/plan-limits"
+import { createMenuItemSchema } from "@/lib/validations/menu-item"
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth()
-    const { name, description, price, image_url, category_id, restaurant_id, is_available } = await request.json()
+    const body = await request.json()
 
-    if (!name || !price || !category_id || !restaurant_id) {
+    // Validate input with Zod
+    const validationResult = createMenuItemSchema.safeParse(body)
+    if (!validationResult.success) {
       return NextResponse.json(
-        { success: false, error: "Nome, preço, categoria e restaurante são obrigatórios" },
+        { success: false, error: "Dados inválidos", details: validationResult.error.issues },
         { status: 400 },
       )
     }
+
+    const { name, description, price, image_url, image_urls, category_id, restaurant_id, is_available } = validationResult.data
 
     // Verify restaurant ownership
     const restaurants = await sql`
@@ -23,6 +29,15 @@ export async function POST(request: NextRequest) {
 
     if (restaurants.length === 0) {
       return NextResponse.json({ success: false, error: "Restaurante não encontrado" }, { status: 404 })
+    }
+
+    // Check plan limits
+    const canAdd = await canAddMenuItem(restaurant_id)
+    if (!canAdd) {
+      return NextResponse.json({
+        success: false,
+        error: "Limite de itens do cardápio atingido. Faça upgrade do seu plano para adicionar mais itens."
+      }, { status: 403 })
     }
 
     // Verify category belongs to restaurant
@@ -47,11 +62,11 @@ export async function POST(request: NextRequest) {
 
     const result = await sql`
       INSERT INTO menu_items (
-        id, name, description, price, image_url, category_id, restaurant_id, 
+        id, name, description, price, image_url, image_urls, category_id, restaurant_id,
         is_available, display_order, created_at, updated_at
       )
       VALUES (
-        gen_random_uuid(), ${name}, ${description}, ${price}, ${image_url}, 
+        gen_random_uuid(), ${name}, ${description}, ${price}, ${image_url}, ${JSON.stringify(image_urls || [])},
         ${category_id}, ${restaurant_id}, ${is_available}, ${nextOrder}, NOW(), NOW()
       )
       RETURNING *

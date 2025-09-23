@@ -34,6 +34,7 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName }: QRCodeGenera
       const canvas = canvasRef.current
       if (!canvas) return
 
+      // Generate QR code
       await QRCode.toCanvas(canvas, menuUrl, {
         width: 175,
         margin: 2,
@@ -43,9 +44,39 @@ export function QRCodeGenerator({ restaurantSlug, restaurantName }: QRCodeGenera
         },
       })
 
-      // Convert canvas to data URL for download
-      const dataUrl = canvas.toDataURL("image/png")
-      setQrCodeDataUrl(dataUrl)
+      // Add logo overlay
+      const ctx = canvas.getContext("2d")
+      if (ctx) {
+        const logo = new Image()
+        logo.crossOrigin = "anonymous"
+        logo.onload = () => {
+          // Calculate logo size (20% of QR code size)
+          const logoSize = canvas.width * 0.2
+          const logoX = (canvas.width - logoSize) / 2
+          const logoY = (canvas.height - logoSize) / 2
+
+          // Draw white background for logo
+          ctx.fillStyle = "#ffffff"
+          ctx.fillRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4)
+
+          // Draw logo
+          ctx.drawImage(logo, logoX, logoY, logoSize, logoSize)
+
+          // Convert canvas to data URL for download
+          const dataUrl = canvas.toDataURL("image/png")
+          setQrCodeDataUrl(dataUrl)
+        }
+        logo.onerror = () => {
+          // If logo fails to load, just use the QR code without logo
+          const dataUrl = canvas.toDataURL("image/png")
+          setQrCodeDataUrl(dataUrl)
+        }
+        logo.src = "/placeholder-logo.png"
+      } else {
+        // Fallback if no canvas context
+        const dataUrl = canvas.toDataURL("image/png")
+        setQrCodeDataUrl(dataUrl)
+      }
     } catch (error) {
       console.error("Error generating QR code:", error)
       toast({
