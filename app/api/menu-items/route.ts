@@ -6,7 +6,7 @@ import { canAddMenuItem } from "@/lib/plan-limits"
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth()
-    const { name, description, price, image_url, category_id, restaurant_id, is_available } = await request.json()
+    const { name, description, price, image_url, image_urls, category_id, restaurant_id, is_available } = await request.json()
 
     if (!name || !price || !category_id || !restaurant_id) {
       return NextResponse.json(
@@ -57,11 +57,11 @@ export async function POST(request: NextRequest) {
 
     const result = await sql`
       INSERT INTO menu_items (
-        id, name, description, price, image_url, category_id, restaurant_id, 
+        id, name, description, price, image_url, image_urls, category_id, restaurant_id,
         is_available, display_order, created_at, updated_at
       )
       VALUES (
-        gen_random_uuid(), ${name}, ${description}, ${price}, ${image_url}, 
+        gen_random_uuid(), ${name}, ${description}, ${price}, ${image_url}, ${JSON.stringify(image_urls || [])},
         ${category_id}, ${restaurant_id}, ${is_available}, ${nextOrder}, NOW(), NOW()
       )
       RETURNING *

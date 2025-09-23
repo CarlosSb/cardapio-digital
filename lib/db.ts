@@ -35,6 +35,7 @@ export interface MenuItem {
   description: string | null
   price: number
   image_url: string | null
+  image_urls: string[] | null
   category_id: string
   restaurant_id: string
   is_available: boolean
@@ -60,11 +61,11 @@ export interface MenuItemWithCategory extends MenuItem {
 export async function getRestaurantByOwner(ownerEmail: string): Promise<Restaurant | null> {
   try {
     const result = await sql`
-      SELECT * FROM restaurants 
-      WHERE owner_email = ${ownerEmail} 
+      SELECT * FROM restaurants
+      WHERE owner_email = ${ownerEmail}
       LIMIT 1
     `
-    return result[0] || null
+    return (result[0] as Restaurant) || null
   } catch (error) {
     console.error("Error fetching restaurant by owner:", error)
     return null
@@ -74,11 +75,11 @@ export async function getRestaurantByOwner(ownerEmail: string): Promise<Restaura
 export async function getRestaurantBySlug(slug: string): Promise<Restaurant | null> {
   try {
     const result = await sql`
-      SELECT * FROM restaurants 
-      WHERE slug = ${slug} 
+      SELECT * FROM restaurants
+      WHERE slug = ${slug}
       LIMIT 1
     `
-    return result[0] || null
+    return (result[0] as Restaurant) || null
   } catch (error) {
     console.error("Error fetching restaurant by slug:", error)
     return null
@@ -88,11 +89,11 @@ export async function getRestaurantBySlug(slug: string): Promise<Restaurant | nu
 export async function getCategoriesByRestaurant(restaurantId: string): Promise<Category[]> {
   try {
     const result = await sql`
-      SELECT * FROM categories 
-      WHERE restaurant_id = ${restaurantId} 
+      SELECT * FROM categories
+      WHERE restaurant_id = ${restaurantId}
       ORDER BY display_order ASC, created_at ASC
     `
-    return result
+    return result as Category[]
   } catch (error) {
     console.error("Error fetching categories:", error)
     return []
@@ -102,11 +103,11 @@ export async function getCategoriesByRestaurant(restaurantId: string): Promise<C
 export async function getMenuItemsByRestaurant(restaurantId: string): Promise<MenuItem[]> {
   try {
     const result = await sql`
-      SELECT * FROM menu_items 
-      WHERE restaurant_id = ${restaurantId} 
+      SELECT * FROM menu_items
+      WHERE restaurant_id = ${restaurantId}
       ORDER BY display_order ASC, created_at ASC
     `
-    return result
+    return result as MenuItem[]
   } catch (error) {
     console.error("Error fetching menu items:", error)
     return []
@@ -116,12 +117,12 @@ export async function getMenuItemsByRestaurant(restaurantId: string): Promise<Me
 export async function getMenuItemsByCategory(categoryId: string): Promise<MenuItem[]> {
   try {
     const result = await sql`
-      SELECT * FROM menu_items 
-      WHERE category_id = ${categoryId} 
+      SELECT * FROM menu_items
+      WHERE category_id = ${categoryId}
       AND is_available = TRUE
       ORDER BY display_order ASC, created_at ASC
     `
-    return result
+    return result as MenuItem[]
   } catch (error) {
     console.error("Error fetching menu items by category:", error)
     return []

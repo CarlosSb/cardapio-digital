@@ -52,6 +52,7 @@ CREATE TABLE menu_items (
     description TEXT,
     price INTEGER NOT NULL, -- Stored in cents
     image_url TEXT,
+    image_urls JSONB, -- Array of additional images
     category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
     restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
     is_available BOOLEAN DEFAULT true,

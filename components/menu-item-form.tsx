@@ -10,20 +10,21 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { ImageUpload } from "@/components/image-upload"
+import { MultiImageUpload } from "@/components/multi-image-upload"
 import type { Category } from "@/lib/db"
 
 interface MenuItemFormProps {
   restaurantId: string
   categories: Category[]
+  maxImages?: number
 }
 
-export function MenuItemForm({ restaurantId, categories }: MenuItemFormProps) {
+export function MenuItemForm({ restaurantId, categories, maxImages = 3 }: MenuItemFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [isAvailable, setIsAvailable] = useState(true)
-  const [imageUrl, setImageUrl] = useState("")
+  const [imageUrls, setImageUrls] = useState<string[]>([])
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -36,7 +37,8 @@ export function MenuItemForm({ restaurantId, categories }: MenuItemFormProps) {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
       price: Number.parseFloat(formData.get("price") as string),
-      image_url: imageUrl,
+      image_url: imageUrls[0] || null, // Keep for backward compatibility
+      image_urls: imageUrls,
       category_id: selectedCategory,
       restaurant_id: restaurantId,
       is_available: isAvailable,
@@ -61,7 +63,7 @@ export function MenuItemForm({ restaurantId, categories }: MenuItemFormProps) {
         e.currentTarget.reset()
         setSelectedCategory("")
         setIsAvailable(true)
-        setImageUrl("")
+        setImageUrls([])
         router.refresh()
       } else {
         setError(result.error || "Erro ao criar item")
@@ -112,7 +114,13 @@ export function MenuItemForm({ restaurantId, categories }: MenuItemFormProps) {
         />
       </div>
 
-      <ImageUpload value={imageUrl} onChange={setImageUrl} label="Imagem do Prato" className="space-y-2" />
+      <MultiImageUpload
+        value={imageUrls}
+        onChange={setImageUrls}
+        maxImages={maxImages}
+        label="Imagens do Prato"
+        className="space-y-2"
+      />
 
       <div className="flex items-center space-x-2">
         <Switch id="is_available" checked={isAvailable} onCheckedChange={setIsAvailable} />

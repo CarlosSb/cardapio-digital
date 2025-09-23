@@ -5,11 +5,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChefHat, ImageIcon, Grid3X3, List } from "lucide-react"
+import { ItemDetailModal } from "@/components/item-detail-modal"
 import type { Restaurant, Category, MenuItem } from "@/lib/db"
 
 interface MenuItemWithCategory extends MenuItem {
   category_name: string
   category_display_order: number
+  image_urls: string[] | null
 }
 
 interface CategoryWithItems extends Category {
@@ -26,6 +28,7 @@ interface PublicMenuContentProps {
 export function PublicMenuContent({ restaurant, menuByCategory, displayMode = 'grid', userDisplayMode }: PublicMenuContentProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [currentDisplayMode, setCurrentDisplayMode] = useState<'grid' | 'list'>(userDisplayMode || displayMode)
+  const [selectedItem, setSelectedItem] = useState<MenuItemWithCategory | null>(null)
 
   // Update display mode when userDisplayMode changes
   useEffect(() => {
@@ -160,12 +163,22 @@ export function PublicMenuContent({ restaurant, menuByCategory, displayMode = 'g
                 {category.items.map((item, index) => (
                   <div
                     key={item.id}
-                    className={`group overflow-hidden animate-scale-in ${
+                    className={`group overflow-hidden animate-scale-in cursor-pointer ${
                       currentDisplayMode === 'grid'
                         ? 'card-modern'
                         : 'bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow'
                     }`}
                     style={{ animationDelay: `${index * 100}ms` }}
+                    onClick={() => setSelectedItem(item)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSelectedItem(item)
+                      }
+                    }}
+                    aria-label={`Ver detalhes de ${item.name}`}
                   >
                     {currentDisplayMode === 'grid' ? (
                       <>
@@ -235,7 +248,7 @@ export function PublicMenuContent({ restaurant, menuByCategory, displayMode = 'g
                           )}
                         </div>
 
-                        {/* Badge de categoria */}
+                        {/* Badge de categoria and Availability */}
                         <div className="flex items-center justify-between">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
                             {category.name}
@@ -368,6 +381,13 @@ export function PublicMenuContent({ restaurant, menuByCategory, displayMode = 'g
           </div>
         </div>
       </footer>
+
+      {/* Item Detail Modal */}
+      <ItemDetailModal
+        item={selectedItem}
+        isOpen={!!selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { requireAuth } from "@/lib/auth"
 import { Category, MenuItemWithCategory, sql } from "@/lib/db"
+import { getCurrentPlan, getMaxImagesLimit } from "@/lib/plan-limits"
 import { MenuItemsTable } from "@/components/menu-items-table"
 import { MenuItemForm } from "@/components/menu-item-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,6 +36,11 @@ export default async function MenuItemsPage() {
       </div>
     )
   }
+
+  // Get current plan
+  const plan = await getCurrentPlan(restaurant.id)
+  const planSlug = plan.slug
+  const maxImages = getMaxImagesLimit(planSlug)
 
   // Get categories and menu items
   const [categories, menuItems] = await Promise.all([
@@ -92,7 +98,7 @@ export default async function MenuItemsPage() {
                   </p>
                 </div>
               ) : (
-                <MenuItemForm restaurantId={restaurant.id} categories={categories} />
+                <MenuItemForm restaurantId={restaurant.id} categories={categories} maxImages={maxImages} />
               )}
             </CardContent>
           </Card>

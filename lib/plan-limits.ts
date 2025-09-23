@@ -4,18 +4,21 @@ import { sql } from "@/lib/db"
 export const PLAN_LIMITS = {
   basic: {
     menuItemsLimit: 50,
+    maxImages: 3,
     analytics: false,
     apiAccess: false,
     multipleUnits: false,
   },
   professional: {
     menuItemsLimit: -1, // unlimited
+    maxImages: 5,
     analytics: true,
     apiAccess: false,
     multipleUnits: false,
   },
   enterprise: {
     menuItemsLimit: -1, // unlimited
+    maxImages: 7,
     analytics: true,
     apiAccess: true,
     multipleUnits: true,
@@ -24,31 +27,41 @@ export const PLAN_LIMITS = {
 
 // Get current plan for a restaurant
 export async function getCurrentPlan(restaurantId: string) {
-  const result = await sql`
-    SELECT
-      p.slug,
-      p.features,
-      s.status
-    FROM plans p
-    JOIN subscriptions s ON p.id = s.plan_id
-    WHERE s.restaurant_id = ${restaurantId}
-    AND s.status = 'active'
-    LIMIT 1
-  `
+  try {
+    const result = await sql`
+      SELECT
+        p.slug,
+        p.features,
+        s.status
+      FROM plans p
+      JOIN subscriptions s ON p.id = s.plan_id
+      WHERE s.restaurant_id = ${restaurantId}
+      AND s.status = 'active'
+      LIMIT 1
+    `
 
-  if (result.length === 0) {
-    // No active plan, return basic limits
+    if (result.length === 0) {
+      // No active plan, return basic limits
+      return {
+        slug: 'basic',
+        features: PLAN_LIMITS.basic,
+        status: 'none',
+      }
+    }
+
+    return {
+      slug: result[0].slug,
+      features: result[0].features,
+      status: result[0].status,
+    }
+  } catch (error) {
+    // If plans table doesn't exist, return basic
+    console.warn('Plans table not found, using basic limits:', error)
     return {
       slug: 'basic',
       features: PLAN_LIMITS.basic,
       status: 'none',
     }
-  }
-
-  return {
-    slug: result[0].slug,
-    features: result[0].features,
-    status: result[0].status,
   }
 }
 
@@ -140,4 +153,10 @@ export function planHasFeature(planSlug: string, feature: keyof typeof PLAN_LIMI
 export function getMenuItemsLimit(planSlug: string): number {
   const limits = getPlanLimits(planSlug)
   return limits.menuItemsLimit
+}
+
+// Get max images limit for plan
+export function getMaxImagesLimit(planSlug: string): number {
+  const limits = getPlanLimits(planSlug)
+  return limits.maxImages
 }

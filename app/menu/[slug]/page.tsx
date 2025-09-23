@@ -7,6 +7,7 @@ import type { Restaurant, Category, MenuItem } from "@/lib/db"
 interface MenuItemWithCategory extends MenuItem {
   category_name: string
   category_display_order: number
+  image_urls: string[] | null
 }
 
 interface CategoryWithItems extends Category {
