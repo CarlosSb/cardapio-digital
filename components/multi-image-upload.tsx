@@ -6,6 +6,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Progress } from "@/components/ui/progress"
 import { Upload, X, ImageIcon, Plus } from "lucide-react"
 
 interface MultiImageUploadProps {
@@ -19,6 +20,9 @@ interface MultiImageUploadProps {
 export function MultiImageUpload({ value = [], onChange, maxImages = 3, label = "Upload Images", className }: MultiImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [previews, setPreviews] = useState<string[]>(value)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadedCount, setUploadedCount] = useState(0)
+  const [totalFiles, setTotalFiles] = useState(0)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -31,9 +35,12 @@ export function MultiImageUpload({ value = [], onChange, maxImages = 3, label = 
     }
 
     setIsUploading(true)
+    setUploadProgress(0)
+    setUploadedCount(0)
+    setTotalFiles(files.length)
 
     try {
-      const uploadPromises = files.map(async (file) => {
+      const uploadPromises = files.map(async (file, index) => {
         const formData = new FormData()
         formData.append("file", file)
 
@@ -48,6 +55,8 @@ export function MultiImageUpload({ value = [], onChange, maxImages = 3, label = 
         }
 
         const data = await response.json()
+        setUploadedCount(prev => prev + 1)
+        setUploadProgress(((index + 1) / files.length) * 100)
         return data.url
       })
 
@@ -55,11 +64,16 @@ export function MultiImageUpload({ value = [], onChange, maxImages = 3, label = 
       const newPreviews = [...previews, ...urls]
       setPreviews(newPreviews)
       onChange(newPreviews)
+      setUploadProgress(100)
     } catch (error) {
       console.error("Upload error:", error)
       alert("Falha no upload de uma ou mais imagens. Tente novamente.")
     } finally {
       setIsUploading(false)
+      setTimeout(() => {
+        setUploadProgress(0)
+        setUploadedCount(0)
+      }, 2000)
     }
   }
 
@@ -123,9 +137,12 @@ export function MultiImageUpload({ value = [], onChange, maxImages = 3, label = 
       </div>
 
       {isUploading && (
-        <div className="mt-2 flex items-center text-sm text-gray-600">
-          <Upload className="animate-spin h-4 w-4 mr-2" />
-          Fazendo upload...
+        <div className="mt-2 space-y-2">
+          <Progress value={uploadProgress} className="w-full" />
+          <div className="flex items-center text-sm text-gray-600">
+            <Upload className="animate-spin h-4 w-4 mr-2" />
+            Fazendo upload... {uploadedCount}/{totalFiles} imagens
+          </div>
         </div>
       )}
     </div>

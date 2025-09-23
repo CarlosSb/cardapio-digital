@@ -2,18 +2,23 @@ import { type NextRequest, NextResponse } from "next/server"
 import { requireAuth } from "@/lib/auth"
 import { sql } from "@/lib/db"
 import { canAddMenuItem } from "@/lib/plan-limits"
+import { createMenuItemSchema } from "@/lib/validations/menu-item"
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth()
-    const { name, description, price, image_url, image_urls, category_id, restaurant_id, is_available } = await request.json()
+    const body = await request.json()
 
-    if (!name || !price || !category_id || !restaurant_id) {
+    // Validate input with Zod
+    const validationResult = createMenuItemSchema.safeParse(body)
+    if (!validationResult.success) {
       return NextResponse.json(
-        { success: false, error: "Nome, preço, categoria e restaurante são obrigatórios" },
+        { success: false, error: "Dados inválidos", details: validationResult.error.issues },
         { status: 400 },
       )
     }
+
+    const { name, description, price, image_url, image_urls, category_id, restaurant_id, is_available } = validationResult.data
 
     // Verify restaurant ownership
     const restaurants = await sql`
