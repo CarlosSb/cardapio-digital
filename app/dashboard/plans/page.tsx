@@ -163,10 +163,10 @@ export default function PlansPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Planos e Assinatura</h1>
-        <p className="text-muted-foreground">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold">Planos e Assinatura</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Gerencie seu plano atual e explore opções de upgrade
         </p>
       </div>
@@ -250,8 +250,8 @@ export default function PlansPage() {
 
       {/* Available Plans */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Planos Disponíveis</h2>
-        <div className="grid gap-6 md:grid-cols-3">
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Planos Disponíveis</h2>
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((availablePlan: any) => {
             const isCurrentPlan = plan?.slug === availablePlan.slug
             const features = availablePlan.features || {}

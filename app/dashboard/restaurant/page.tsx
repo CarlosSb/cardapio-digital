@@ -17,22 +17,26 @@ export default async function RestaurantPage() {
   const restaurant = restaurants[0] as any || null
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Restaurante</h1>
-        <p className="text-muted-foreground">Configure as informações do seu restaurante</p>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Restaurante</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          Configure as informações do seu restaurante
+        </p>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>{restaurant ? "Editar Restaurante" : "Cadastrar Restaurante"}</CardTitle>
-          <CardDescription>
+        <CardHeader className="pb-4 sm:pb-6">
+          <CardTitle className="text-lg sm:text-xl">
+            {restaurant ? "Editar Restaurante" : "Cadastrar Restaurante"}
+          </CardTitle>
+          <CardDescription className="text-sm sm:text-base">
             {restaurant
               ? "Atualize as informações do seu restaurante"
               : "Cadastre seu restaurante para começar a criar o cardápio"}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <RestaurantForm restaurant={restaurant} userEmail={user.email} />
         </CardContent>
       </Card>

@@ -165,24 +165,31 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gerenciamento de Usuários</h1>
-          <p className="text-muted-foreground mt-1">
+      {/* Header - Mobile First */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Gerenciamento de Usuários</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Gerencie usuários e suas permissões ({filteredUsers.length} usuários)
           </p>
         </div>
-        <Button onClick={loadUsers} variant="outline" className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Atualizar
-        </Button>
+        <div className="flex items-center gap-2 sm:gap-3 self-start sm:self-auto">
+          <Button
+            onClick={loadUsers}
+            variant="outline"
+            size="sm"
+            className="gap-2 text-xs sm:text-sm"
+          >
+            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Atualizar</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters - Mobile First */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex gap-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -190,12 +197,12 @@ export default function AdminUsersPage() {
                   placeholder="Buscar por nome ou email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-sm sm:text-base"
                 />
               </div>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -209,43 +216,45 @@ export default function AdminUsersPage() {
         </CardContent>
       </Card>
 
-      {/* Users List */}
-      <div className="grid gap-4">
+      {/* Users List - Mobile First */}
+      <div className="grid gap-3 sm:gap-4">
         {filteredUsers.map((user) => (
-          <Card key={user.id}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-lg">{user.name || 'Sem nome'}</h3>
-                    {getStatusBadge(user)}
+          <Card key={user.id} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    <h3 className="font-semibold text-base sm:text-lg truncate">{user.name || 'Sem nome'}</h3>
+                    <div className="flex-shrink-0">
+                      {getStatusBadge(user)}
+                    </div>
                   </div>
-                  <p className="text-muted-foreground">{user.email}</p>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
+                  <p className="text-sm sm:text-base text-muted-foreground truncate">{user.email}</p>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <Calendar className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">
                       Criado em {new Date(user.created_at).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 self-start sm:self-auto">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setViewingUserRestaurants(user)}
-                    className="gap-2"
+                    className="gap-1 text-xs sm:text-sm"
                   >
-                    <Building2 className="h-4 w-4" />
-                    Ver Restaurantes
+                    <Building2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Ver Restaurantes</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setBlockBanDialog({ type: 'user', item: user })}
-                    className="gap-2"
+                    className="gap-1 text-xs sm:text-sm"
                   >
-                    <Shield className="h-4 w-4" />
-                    Moderar
+                    <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Moderar</span>
                   </Button>
                 </div>
               </div>
@@ -256,10 +265,10 @@ export default function AdminUsersPage() {
 
       {filteredUsers.length === 0 && (
         <Card>
-          <CardContent className="p-12 text-center">
-            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum usuário encontrado</h3>
-            <p className="text-muted-foreground">
+          <CardContent className="p-8 sm:p-12 text-center">
+            <Users className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold mb-2">Nenhum usuário encontrado</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Tente ajustar os filtros de busca ou status.
             </p>
           </CardContent>

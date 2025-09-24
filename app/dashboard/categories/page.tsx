@@ -20,15 +20,17 @@ export default async function CategoriesPage() {
 
   if (!restaurant) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Categorias</h1>
-          <p className="text-muted-foreground">Organize seu cardápio em categorias</p>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Categorias</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Organize seu cardápio em categorias</p>
         </div>
         <Card>
-          <CardHeader>
-            <CardTitle>Restaurante não encontrado</CardTitle>
-            <CardDescription>Você precisa cadastrar um restaurante primeiro</CardDescription>
+          <CardHeader className="pb-4 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl">Restaurante não encontrado</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
+              Você precisa cadastrar um restaurante primeiro
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -43,37 +45,41 @@ export default async function CategoriesPage() {
   ` as Category[];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Categorias</h1>
-        <p className="text-muted-foreground">Organize seu cardápio em categorias</p>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Categorias</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Organize seu cardápio em categorias</p>
       </div>
 
       <Tabs defaultValue="list" className="w-full">
-        <TabsList>
-          <TabsTrigger value="list">Lista de Categorias</TabsTrigger>
-          <TabsTrigger value="add">Adicionar Categoria</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="list" className="text-xs sm:text-sm">Lista de Categorias</TabsTrigger>
+          <TabsTrigger value="add" className="text-xs sm:text-sm">Adicionar Categoria</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="list">
+        <TabsContent value="list" className="mt-4 sm:mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Suas Categorias</CardTitle>
-              <CardDescription>Gerencie as categorias do seu cardápio</CardDescription>
+            <CardHeader className="pb-4 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl">Suas Categorias</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Gerencie as categorias do seu cardápio
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <CategoriesTable categories={categories} restaurantId={restaurant.id} />
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="add">
+        <TabsContent value="add" className="mt-4 sm:mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Nova Categoria</CardTitle>
-              <CardDescription>Adicione uma nova categoria ao seu cardápio</CardDescription>
+            <CardHeader className="pb-4 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl">Nova Categoria</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Adicione uma nova categoria ao seu cardápio
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <CategoryForm restaurantId={restaurant.id} />
             </CardContent>
           </Card>

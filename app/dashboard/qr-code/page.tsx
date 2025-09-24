@@ -17,26 +17,26 @@ export default async function QRCodePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">QR Code do Cardápio</h1>
-        <p className="text-gray-600 mt-2">Gere e baixe o QR code para que seus clientes acessem o cardápio digital</p>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">QR Code do Cardápio</h1>
+        <p className="text-sm sm:text-base text-gray-600">Gere e baixe o QR code para que seus clientes acessem o cardápio digital</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <div className="space-y-6">
             <QRCodeGenerator restaurantSlug={restaurant.slug} restaurantName={restaurant.name} />
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-amber-500" />
+            <CardHeader className="pb-4 sm:pb-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
                 Como usar o QR Code
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 bg-cyan-100 text-cyan-600 rounded-full flex items-center justify-center text-sm font-semibold">
                   1
@@ -70,28 +70,28 @@ export default async function QRCodePage() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-green-500" />
+            <CardHeader className="pb-4 sm:pb-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 Benefícios do Cardápio Digital
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2 sm:space-y-3">
               <div className="flex items-center gap-2">
-                <Smartphone className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">Acesso instantâneo pelo celular</span>
+                <Smartphone className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                <span className="text-xs sm:text-sm">Acesso instantâneo pelo celular</span>
               </div>
               <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">Atualizações em tempo real</span>
+                <Zap className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                <span className="text-xs sm:text-sm">Atualizações em tempo real</span>
               </div>
               <div className="flex items-center gap-2">
-                <QrCode className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">Sem necessidade de cardápios físicos</span>
+                <QrCode className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                <span className="text-xs sm:text-sm">Sem necessidade de cardápios físicos</span>
               </div>
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">Melhor experiência do cliente</span>
+                <Users className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                <span className="text-xs sm:text-sm">Melhor experiência do cliente</span>
               </div>
             </CardContent>
           </Card>

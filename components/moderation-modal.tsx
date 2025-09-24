@@ -249,7 +249,7 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-full max-w-7xl max-h-[95vh] overflow-hidden z-[9999] mx-4">
+        <DialogContent className="w-[95vw] max-w-2xl sm:max-w-4xl lg:max-w-6xl xl:max-w-7xl max-h-[90vh] sm:max-h-[95vh] overflow-hidden z-[9999]">
           <DialogHeader className="relative">
             <DialogTitle className="flex items-center gap-2 pr-8">
               <Shield className="h-5 w-5" />
@@ -321,8 +321,8 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
             </Card>
           </div>
 
-          {/* Filters */}
-          <div className="flex gap-4 mb-4">
+          {/* Filters - Mobile First */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 mb-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -330,25 +330,33 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
                   placeholder="Buscar por nome, email ou slug..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-sm sm:text-base"
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Status</SelectItem>
-                <SelectItem value="active">Ativos</SelectItem>
-                <SelectItem value="blocked">Bloqueados</SelectItem>
-                <SelectItem value="banned">Banidos</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={loadData} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Atualizar
-            </Button>
+            <div className="flex gap-2 sm:gap-4">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <SelectItem value="active">Ativos</SelectItem>
+                  <SelectItem value="blocked">Bloqueados</SelectItem>
+                  <SelectItem value="banned">Banidos</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                onClick={loadData}
+                disabled={loading}
+                size="sm"
+                className="gap-1 text-xs sm:text-sm"
+              >
+                <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Atualizar</span>
+              </Button>
+            </div>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -363,28 +371,31 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="users" className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+            <TabsContent value="users" className="max-h-[50vh] sm:max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               <div className="space-y-2">
                 {paginatedUsers.map((user) => (
-                  <Card key={user.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="font-medium">{user.name || 'Sem nome'}</div>
-                          <div className="text-sm text-muted-foreground">{user.email}</div>
-                          <div className="text-xs text-muted-foreground">
+                  <Card key={user.id} className="hover:shadow-sm transition-shadow">
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <div className="font-medium text-sm sm:text-base truncate">{user.name || 'Sem nome'}</div>
+                          <div className="text-xs sm:text-sm text-muted-foreground truncate">{user.email}</div>
+                          <div className="text-xs text-muted-foreground hidden sm:block">
                             Criado em {new Date(user.created_at).toLocaleDateString('pt-BR')}
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          {getStatusBadge(user)}
+                        <div className="flex items-center gap-2 sm:gap-3 self-start sm:self-auto">
+                          <div className="flex-shrink-0">
+                            {getStatusBadge(user)}
+                          </div>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setBlockBanDialog({ type: 'user', item: user })}
+                            className="text-xs sm:text-sm gap-1"
                           >
-                            <Shield className="h-4 w-4 mr-1" />
-                            Moderar
+                            <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Moderar</span>
                           </Button>
                         </div>
                       </div>
@@ -428,42 +439,50 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
               )}
             </TabsContent>
 
-            <TabsContent value="restaurants" className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+            <TabsContent value="restaurants" className="max-h-[50vh] sm:max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               <div className="space-y-2">
                 {paginatedRestaurants.map((restaurant) => (
-                  <Card key={restaurant.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="font-medium">{restaurant.name}</div>
-                          <div className="text-sm text-muted-foreground">Slug: {restaurant.slug}</div>
-                          <div className="text-xs text-muted-foreground">
+                  <Card key={restaurant.id} className="hover:shadow-sm transition-shadow">
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <div className="font-medium text-sm sm:text-base truncate">{restaurant.name}</div>
+                          <div className="text-xs sm:text-sm text-muted-foreground truncate">Slug: {restaurant.slug}</div>
+                          <div className="text-xs text-muted-foreground hidden sm:block">
                             Criado em {new Date(restaurant.created_at).toLocaleDateString('pt-BR')}
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          {getStatusBadge(restaurant)}
-                          <div className="flex gap-2">
+                        <div className="flex items-center gap-2 sm:gap-3 self-start sm:self-auto">
+                          <div className="flex-shrink-0">
+                            {getStatusBadge(restaurant)}
+                          </div>
+                          <div className="flex gap-1 sm:gap-2">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => setPreviewingRestaurant(restaurant)}
+                              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+                              title="Ver menu"
                             >
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => setEditingRestaurant(restaurant)}
+                              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+                              title="Editar"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => setBlockBanDialog({ type: 'restaurant', item: restaurant })}
+                              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+                              title="Moderar"
                             >
-                              <Shield className="h-4 w-4" />
+                              <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                           </div>
                         </div>
