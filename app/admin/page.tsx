@@ -252,12 +252,13 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="restaurants">Restaurantes ({allRestaurants.length})</TabsTrigger>
-          <TabsTrigger value="users">Usuários ({allUsers.length})</TabsTrigger>
-          <TabsTrigger value="plans">Planos</TabsTrigger>
-        </TabsList>
+        <TabsList className="grid w-full grid-cols-5">
+           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+           <TabsTrigger value="restaurants">Restaurantes ({allRestaurants.length})</TabsTrigger>
+           <TabsTrigger value="users">Usuários ({allUsers.length})</TabsTrigger>
+           <TabsTrigger value="plans">Planos</TabsTrigger>
+           <TabsTrigger value="reports">Relatórios</TabsTrigger>
+         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
 
@@ -599,7 +600,11 @@ export default function AdminDashboard() {
               <Shield className="h-6 w-6" />
               <span>Centro de Moderação</span>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => setActiveTab("reports")}
+            >
               <DollarSign className="h-6 w-6" />
               <span>Relatórios Financeiros</span>
             </Button>
@@ -738,35 +743,87 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="plans" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gerenciamento de Planos</CardTitle>
-              <CardDescription>
-                Configure os planos de assinatura disponíveis na plataforma
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {plans.map((plan: any) => (
-                  <div key={plan.plan_name} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="space-y-1">
-                      <p className="font-medium">{plan.plan_name}</p>
-                      <p className="text-sm text-muted-foreground">{plan.subscription_count} assinaturas ativas</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={plan.subscription_count > 0 ? "default" : "secondary"}>
-                        {plan.subscription_count > 0 ? "Ativo" : "Inativo"}
-                      </Badge>
-                      <Button variant="outline" size="sm">
-                        Editar
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+           <Card>
+             <CardHeader>
+               <CardTitle>Gerenciamento de Planos</CardTitle>
+               <CardDescription>
+                 Configure os planos de assinatura disponíveis na plataforma
+               </CardDescription>
+             </CardHeader>
+             <CardContent>
+               <div className="space-y-4">
+                 {plans.map((plan: any) => (
+                   <div key={plan.plan_name} className="flex items-center justify-between p-4 border rounded-lg">
+                     <div className="space-y-1">
+                       <p className="font-medium">{plan.plan_name}</p>
+                       <p className="text-sm text-muted-foreground">{plan.subscription_count} assinaturas ativas</p>
+                     </div>
+                     <div className="flex items-center gap-2">
+                       <Badge variant={plan.subscription_count > 0 ? "default" : "secondary"}>
+                         {plan.subscription_count > 0 ? "Ativo" : "Inativo"}
+                       </Badge>
+                       <Button variant="outline" size="sm">
+                         Editar
+                       </Button>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             </CardContent>
+           </Card>
+         </TabsContent>
+
+         <TabsContent value="reports" className="space-y-6">
+           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+             <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/admin/reports'}>
+               <CardHeader className="text-center">
+                 <DollarSign className="h-12 w-12 mx-auto text-green-600 mb-2" />
+                 <CardTitle>Relatórios Financeiros</CardTitle>
+                 <CardDescription>
+                   Análise detalhada de receita, transações e performance financeira
+                 </CardDescription>
+               </CardHeader>
+               <CardContent>
+                 <Button className="w-full">
+                   <BarChart3 className="h-4 w-4 mr-2" />
+                   Ver Relatórios
+                 </Button>
+               </CardContent>
+             </Card>
+
+             <Card className="cursor-pointer hover:shadow-md transition-shadow">
+               <CardHeader className="text-center">
+                 <Users className="h-12 w-12 mx-auto text-blue-600 mb-2" />
+                 <CardTitle>Relatórios de Usuários</CardTitle>
+                 <CardDescription>
+                   Estatísticas de cadastro, atividade e retenção de usuários
+                 </CardDescription>
+               </CardHeader>
+               <CardContent>
+                 <Button variant="outline" className="w-full" disabled>
+                   <Users className="h-4 w-4 mr-2" />
+                   Em breve
+                 </Button>
+               </CardContent>
+             </Card>
+
+             <Card className="cursor-pointer hover:shadow-md transition-shadow">
+               <CardHeader className="text-center">
+                 <Building2 className="h-12 w-12 mx-auto text-purple-600 mb-2" />
+                 <CardTitle>Relatórios de Restaurantes</CardTitle>
+                 <CardDescription>
+                   Performance dos restaurantes, itens mais vendidos e métricas
+                 </CardDescription>
+               </CardHeader>
+               <CardContent>
+                 <Button variant="outline" className="w-full" disabled>
+                   <Building2 className="h-4 w-4 mr-2" />
+                   Em breve
+                 </Button>
+               </CardContent>
+             </Card>
+           </div>
+         </TabsContent>
       </Tabs>
 
       <UserEditModal

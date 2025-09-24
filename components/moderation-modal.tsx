@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
 import {
   Shield,
   Users,
@@ -58,6 +60,8 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   // Modal states
   const [blockBanDialog, setBlockBanDialog] = useState<{
@@ -191,23 +195,37 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+                          user.email?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' ||
-                         (statusFilter === 'active' && !user.is_blocked && !user.is_banned) ||
-                         (statusFilter === 'blocked' && user.is_blocked) ||
-                         (statusFilter === 'banned' && user.is_banned)
+                          (statusFilter === 'active' && !user.is_blocked && !user.is_banned) ||
+                          (statusFilter === 'blocked' && user.is_blocked) ||
+                          (statusFilter === 'banned' && user.is_banned)
     return matchesSearch && matchesStatus
   })
 
   const filteredRestaurants = restaurants.filter(restaurant => {
     const matchesSearch = restaurant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         restaurant.slug?.toLowerCase().includes(searchTerm.toLowerCase())
+                          restaurant.slug?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' ||
-                         (statusFilter === 'active' && !restaurant.is_blocked && !restaurant.is_banned) ||
-                         (statusFilter === 'blocked' && restaurant.is_blocked) ||
-                         (statusFilter === 'banned' && restaurant.is_banned)
+                          (statusFilter === 'active' && !restaurant.is_blocked && !restaurant.is_banned) ||
+                          (statusFilter === 'blocked' && restaurant.is_blocked) ||
+                          (statusFilter === 'banned' && restaurant.is_banned)
     return matchesSearch && matchesStatus
   })
+
+  // Pagination
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+  const paginatedRestaurants = filteredRestaurants.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  const totalPages = Math.ceil(
+    (activeTab === 'users' ? filteredUsers.length : filteredRestaurants.length) / itemsPerPage
+  )
 
   const getStatusBadge = (item: any) => {
     if (item.is_banned) {
@@ -231,15 +249,24 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden z-[9999]">
+          <DialogHeader className="relative">
+            <DialogTitle className="flex items-center gap-2 pr-8">
               <Shield className="h-5 w-5" />
               Centro de Moderação
             </DialogTitle>
             <DialogDescription>
               Gerencie usuários e restaurantes com ferramentas avançadas de moderação
             </DialogDescription>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-0 top-0 h-8 w-8 p-0 hover:bg-muted"
+              onClick={onClose}
+              aria-label="Fechar modal"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </DialogHeader>
 
           {/* Stats Overview */}
@@ -326,11 +353,11 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="users" className="flex items-center gap-2">
+              <TabsTrigger value="users" className="flex items-center gap-2" onClick={() => setCurrentPage(1)}>
                 <Users className="h-4 w-4" />
                 Usuários ({filteredUsers.length})
               </TabsTrigger>
-              <TabsTrigger value="restaurants" className="flex items-center gap-2">
+              <TabsTrigger value="restaurants" className="flex items-center gap-2" onClick={() => setCurrentPage(1)}>
                 <Building2 className="h-4 w-4" />
                 Restaurantes ({filteredRestaurants.length})
               </TabsTrigger>
@@ -338,7 +365,7 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
 
             <TabsContent value="users" className="max-h-96 overflow-y-auto">
               <div className="space-y-2">
-                {filteredUsers.map((user) => (
+                {paginatedUsers.map((user) => (
                   <Card key={user.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -365,11 +392,45 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
                   </Card>
                 ))}
               </div>
+              {totalPages > 1 && (
+                <div className="mt-4 flex justify-center">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={page === currentPage}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      })}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="restaurants" className="max-h-96 overflow-y-auto">
               <div className="space-y-2">
-                {filteredRestaurants.map((restaurant) => (
+                {paginatedRestaurants.map((restaurant) => (
                   <Card key={restaurant.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -411,6 +472,40 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
                   </Card>
                 ))}
               </div>
+              {totalPages > 1 && (
+                <div className="mt-4 flex justify-center">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={page === currentPage}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      })}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </DialogContent>

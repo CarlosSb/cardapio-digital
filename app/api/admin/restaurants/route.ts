@@ -16,7 +16,13 @@ export async function GET() {
         owner_email,
         logo_url,
         menu_display_mode,
-        created_at
+        created_at,
+        is_blocked,
+        blocked_at,
+        blocked_reason,
+        is_banned,
+        banned_at,
+        banned_reason
       FROM restaurants
       ORDER BY created_at DESC
     `

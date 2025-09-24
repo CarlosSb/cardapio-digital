@@ -12,7 +12,13 @@ export async function GET() {
         id,
         name,
         email,
-        created_at
+        created_at,
+        is_blocked,
+        blocked_at,
+        blocked_reason,
+        is_banned,
+        banned_at,
+        banned_reason
       FROM users
       ORDER BY created_at DESC
     `

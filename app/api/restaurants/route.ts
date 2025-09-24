@@ -12,22 +12,44 @@ export async function GET(request: NextRequest) {
     // Otherwise, return user's own restaurants
     const targetEmail = ownerEmail || user.email
 
+    console.log("🔍 Fetching restaurants for email:", targetEmail)
+
+    // Check if moderation columns exist
+    const columnCheck = await sql`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_name = 'restaurants' AND column_name IN ('is_blocked', 'is_banned')
+    `
+
+    console.log("📊 Restaurant moderation columns found:", columnCheck)
+
+    const hasModerationColumns = columnCheck.length >= 2
+
+    let selectFields = `
+      id,
+      name,
+      slug,
+      description,
+      owner_email,
+      logo_url,
+      menu_display_mode,
+      created_at
+    `
+
+    if (hasModerationColumns) {
+      selectFields += `,
+      is_blocked,
+      is_banned`
+    }
+
     const restaurants = await sql`
-      SELECT
-        id,
-        name,
-        slug,
-        description,
-        owner_email,
-        logo_url,
-        menu_display_mode,
-        is_blocked,
-        is_banned,
-        created_at
+      SELECT ${selectFields}
       FROM restaurants
       WHERE owner_email = ${targetEmail}
       ORDER BY created_at DESC
     `
+
+    console.log("✅ Found restaurants:", restaurants.length)
 
     return NextResponse.json({ success: true, restaurants })
   } catch (error) {
