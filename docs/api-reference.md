@@ -25,7 +25,7 @@ Realiza o login do usuário.
 }
 ```
 
-**Response (400):**
+**Response (400/401):**
 ```json
 {
   "success": false,
@@ -420,7 +420,7 @@ Todas as respostas de erro seguem o formato:
 - **SQL Injection**: Queries parametrizadas
 - **XSS**: Sanitização de inputs
 - **CSRF**: Proteção via SameSite cookies
-- **Rate Limiting**: Implementado nas APIs críticas
+- **Rate Limiting**: Implementado nas APIs críticas (5 req/min em `/api/auth/*`, 60 req/min em `/api/admin/*`)
 
 ## 📊 Limites e Quotas
 
@@ -432,9 +432,7 @@ Todas as respostas de erro seguem o formato:
 
 ## 🔄 Versionamento
 
-A API é versionada através da URL:
-- `/api/v1/` - Versão atual
-- Futuras versões: `/api/v2/`, `/api/v3/`
+Atualmente as rotas utilizam `/api/*` sem prefixo de versão. Quando necessário, um prefixo `/api/v1/*` será introduzido de forma retrocompatível.
 
 ## 📞 Suporte
 

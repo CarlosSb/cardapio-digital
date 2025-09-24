@@ -26,10 +26,10 @@ O sistema segue uma arquitetura **Full-Stack JavaScript** com as seguintes camad
 - **Formulários**: React Hook Form + Zod validation
 
 ### Backend
-- **API**: Next.js API Routes
+- **API**: Next.js API Routes (sem prefixo de versão por ora)
 - **Banco de Dados**: PostgreSQL via Neon Serverless
-- **ORM**: SQL direto com queries parametrizadas
-- **Autenticação**: Cookie-based sessions
+- **ORM**: Drizzle ORM + SQL tag para compatibilidade durante migração
+- **Autenticação**: Cookies de sessão; RBAC via `platform_users` (roles: `admin`, `super_admin`)
 - **Upload**: Vercel Blob Storage
 
 ### Infraestrutura
@@ -198,7 +198,8 @@ erDiagram
 ### Tratamento de Erros
 - **API**: Try-catch com respostas padronizadas
 - **Frontend**: Error boundaries + toast notifications
-- **Logs**: Console.error para debugging
+- **Segurança**: Rate limiting via middleware (auth e admin)
+- **Headers**: CSP mínima, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
 
 ### Upload de Arquivos
 - **Storage**: Vercel Blob
