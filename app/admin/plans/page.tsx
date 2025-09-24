@@ -181,7 +181,7 @@ export default function AdminPlansPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -203,7 +203,7 @@ export default function AdminPlansPage() {
       </div>
 
       {/* Plans Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {plans.map((plan) => (
           <Card key={plan.id} className={`relative ${!plan.is_active ? 'opacity-60' : ''}`}>
             <CardHeader>
@@ -278,7 +278,7 @@ export default function AdminPlansPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <div className="text-center">
               <div className="text-2xl font-bold">{plans.length}</div>
               <div className="text-sm text-muted-foreground">Total de Planos</div>

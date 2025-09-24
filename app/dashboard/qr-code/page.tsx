@@ -17,7 +17,7 @@ export default async function QRCodePage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       <div className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">QR Code do Cardápio</h1>
         <p className="text-sm sm:text-base text-gray-600">Gere e baixe o QR code para que seus clientes acessem o cardápio digital</p>
