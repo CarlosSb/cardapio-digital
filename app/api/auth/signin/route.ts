@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const result = await signIn(email, password)
 
     if (result.success) {
-      return NextResponse.json({ success: true })
+      return NextResponse.json({ success: true, redirectTo: '/dashboard' })
     } else {
       return NextResponse.json({ success: false, error: result.error }, { status: 401 })
     }

@@ -216,3 +216,114 @@ return (
     </main>
   )
 }
+
+export function AdminPageSkeleton() {
+  return (
+    <div className="space-y-8">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <TextSkeleton className="h-8 w-64" />
+          <TextSkeleton className="h-4 w-96" />
+        </div>
+        <TextSkeleton className="h-10 w-32" />
+      </div>
+
+      {/* Tabs Skeleton */}
+      <div className="space-y-6">
+        <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
+          <TextSkeleton className="h-10 w-24" />
+          <TextSkeleton className="h-10 w-32" />
+          <TextSkeleton className="h-10 w-24" />
+        </div>
+
+        {/* Stats Cards Skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+
+        {/* Charts Skeleton */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-lg border bg-card p-6">
+            <TextSkeleton className="h-6 w-48 mb-4" />
+            <TextSkeleton className="h-80 w-full" />
+          </div>
+          <div className="rounded-lg border bg-card p-6">
+            <TextSkeleton className="h-6 w-40 mb-4" />
+            <TextSkeleton className="h-80 w-full" />
+          </div>
+        </div>
+
+        {/* Recent Items Skeleton */}
+        <div className="rounded-lg border bg-card">
+          <div className="p-6 border-b">
+            <TextSkeleton className="h-6 w-48 mb-2" />
+            <TextSkeleton className="h-4 w-64" />
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="space-y-2">
+                <TextSkeleton className="h-5 w-48" />
+                <TextSkeleton className="h-4 w-32" />
+                <div className="flex gap-2">
+                  <TextSkeleton className="h-5 w-16" />
+                  <TextSkeleton className="h-5 w-20" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <TextSkeleton className="h-8 w-16" />
+                <TextSkeleton className="h-8 w-12" />
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="space-y-2">
+                <TextSkeleton className="h-5 w-40" />
+                <TextSkeleton className="h-4 w-28" />
+                <div className="flex gap-2">
+                  <TextSkeleton className="h-5 w-12" />
+                  <TextSkeleton className="h-5 w-18" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <TextSkeleton className="h-8 w-16" />
+                <TextSkeleton className="h-8 w-12" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Revenue Section Skeleton */}
+        <div className="rounded-lg border bg-card p-6">
+          <TextSkeleton className="h-6 w-56 mb-4" />
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <TextSkeleton className="h-4 w-32" />
+              <TextSkeleton className="h-8 w-24" />
+            </div>
+            <div className="space-y-2">
+              <TextSkeleton className="h-4 w-28" />
+              <TextSkeleton className="h-8 w-20" />
+            </div>
+            <div className="space-y-2">
+              <TextSkeleton className="h-4 w-24" />
+              <TextSkeleton className="h-8 w-16" />
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions Skeleton */}
+        <div className="rounded-lg border bg-card p-6">
+          <TextSkeleton className="h-6 w-40 mb-4" />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <TextSkeleton className="h-20 w-full" />
+            <TextSkeleton className="h-20 w-full" />
+            <TextSkeleton className="h-20 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

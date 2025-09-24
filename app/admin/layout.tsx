@@ -1,5 +1,10 @@
 import type React from "react"
 import { requireAdmin } from "@/lib/auth"
+import { AdminHeader } from "@/components/admin-header"
+import { AdminSidebar } from "@/components/admin-sidebar"
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 
 export default async function AdminLayout({
   children,
@@ -9,18 +14,14 @@ export default async function AdminLayout({
   await requireAdmin()
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-muted/30 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-          <div className="text-sm text-muted-foreground">
-            Plataforma Cardápio Digital
-          </div>
+    <SidebarProvider>
+      <AdminSidebar />
+      <SidebarInset>
+        <AdminHeader />
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          {children}
         </div>
-      </header>
-      <main className="container mx-auto p-6">
-        {children}
-      </main>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

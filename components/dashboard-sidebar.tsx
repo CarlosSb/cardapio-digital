@@ -1,6 +1,7 @@
 "use client"
 
-import { Building2, Home, Menu, Tags, QrCode, LogOut, ChefHat, Crown } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Building2, Home, Menu, Tags, QrCode, LogOut, ChefHat, Crown, Shield, Settings } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -51,6 +52,23 @@ const menuItems = [
 
 export function DashboardSidebar() {
   const pathname = usePathname()
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    // Check if user is admin
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch('/api/admin/stats')
+        if (response.ok) {
+          setIsAdmin(true)
+        }
+      } catch (error) {
+        // User is not admin
+        setIsAdmin(false)
+      }
+    }
+    checkAdminStatus()
+  }, [])
 
   const handleSignOut = async () => {
     await fetch("/api/auth/signout", { method: "POST" })
@@ -89,6 +107,16 @@ export function DashboardSidebar() {
 
       <SidebarFooter>
         <SidebarMenu>
+          {isAdmin && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Painel Admin">
+                <Link href="/admin" prefetch={false}>
+                  <Shield />
+                  <span>Admin</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleSignOut} tooltip="Sair">
               <LogOut />

@@ -137,6 +137,14 @@ export type Restaurant = {
   owner_email: string
   logo_url: string | null
   menu_display_mode: 'grid' | 'list'
+  is_blocked: boolean
+  blocked_at: Date | null
+  blocked_by: string | null
+  blocked_reason: string | null
+  is_banned: boolean
+  banned_at: Date | null
+  banned_by: string | null
+  banned_reason: string | null
   created_at: Date
   updated_at: Date
 }
@@ -164,4 +172,23 @@ export type MenuItem = {
   display_order: number
   created_at: Date
   updated_at: Date
+}
+
+export type User = {
+  id: string
+  name: string | null
+  email: string
+  password_hash: string
+  is_blocked: boolean
+  blocked_at: Date | null
+  blocked_by: string | null
+  blocked_reason: string | null
+  is_banned: boolean
+  banned_at: Date | null
+  banned_by: string | null
+  banned_reason: string | null
+  created_at: Date
+  updated_at: Date
+  deleted_at: Date | null
+  raw_json: any
 }

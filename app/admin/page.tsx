@@ -1,319 +1,262 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { sql } from "@/lib/db"
-import { Users, Building2, DollarSign, TrendingUp, Calendar, Eye, BarChart3, PieChart, Activity } from "lucide-react"
-// import { AdminCharts } from "@/components/admin-charts" // Temporarily disabled due to recharts SSR issues
+import { Users, Building2, DollarSign, TrendingUp, Shield, BarChart3, Settings, RefreshCw, ArrowUpRight } from "lucide-react"
+import Link from "next/link"
+import { AdminPageSkeleton } from "@/components/skeletons"
 
-export default async function AdminDashboard() {
-  // Get platform statistics
-  let stats = { total_restaurants: 0, new_restaurants_30d: 0, new_restaurants_7d: 0 }
-  let revenue = { total_revenue: 0, successful_payments: 0, pending_payments: 0 }
-  let plans = []
-  let growth = []
+export default function AdminDashboard() {
+  const [metrics, setMetrics] = useState<any>({})
+  const [loading, setLoading] = useState(true)
 
-  // Try to get restaurant stats
-  try {
-    const restaurantStats = await sql`
-      SELECT
-        COUNT(*) as total_restaurants,
-        COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as new_restaurants_30d,
-        COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) as new_restaurants_7d
-      FROM restaurants
-    `
-    stats = restaurantStats[0] as any
-  } catch (error) {
-    console.warn("Restaurant stats query failed:", error)
+  useEffect(() => {
+    const loadMetrics = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch('/api/admin/metrics')
+        if (response.ok) {
+          const data = await response.json()
+          setMetrics(data)
+        } else {
+          // Fallback data
+          setMetrics({
+            userMetrics: { total_users: 0, blocked_users: 0, banned_users: 0 },
+            restaurantMetrics: { total_restaurants: 0, blocked_restaurants: 0, banned_restaurants: 0 },
+            paymentMetrics: { total_revenue: 0, total_payments: 0 }
+          })
+        }
+      } catch (error) {
+        console.error('Error loading metrics:', error)
+        setMetrics({
+          userMetrics: { total_users: 0, blocked_users: 0, banned_users: 0 },
+          restaurantMetrics: { total_restaurants: 0, blocked_restaurants: 0, banned_restaurants: 0 },
+          paymentMetrics: { total_revenue: 0, total_payments: 0 }
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadMetrics()
+  }, [])
+
+  if (loading) {
+    return <AdminPageSkeleton />
   }
-
-  // Try to get revenue stats
-  try {
-    const revenueStats = await sql`
-      SELECT
-        COALESCE(SUM(amount_cents), 0) as total_revenue,
-        COUNT(CASE WHEN status = 'succeeded' THEN 1 END) as successful_payments,
-        COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_payments
-      FROM payments
-      WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
-    `
-    revenue = revenueStats[0] as any
-  } catch (error) {
-    console.warn("Revenue stats query failed:", error)
-  }
-
-  // Try to get plan stats
-  try {
-    const planStats = await sql`
-      SELECT
-        p.name as plan_name,
-        COUNT(s.id) as subscription_count
-      FROM plans p
-      LEFT JOIN subscriptions s ON p.id = s.plan_id AND s.status = 'active'
-      GROUP BY p.id, p.name, p.display_order
-      ORDER BY p.display_order
-    `
-    plans = planStats as any
-  } catch (error) {
-    console.warn("Plan stats query failed, using default data:", error)
-    // Fallback data if tables don't exist
-    plans = [
-      { plan_name: 'Básico', subscription_count: 0 },
-      { plan_name: 'Profissional', subscription_count: 0 },
-      { plan_name: 'Empresarial', subscription_count: 0 }
-    ]
-  }
-
-  // Try to get growth data
-  try {
-    const growthData = await sql`
-      SELECT
-        DATE(created_at) as date,
-        COUNT(*) as count
-      FROM restaurants
-      WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
-      GROUP BY DATE(created_at)
-      ORDER BY DATE(created_at)
-    `
-    growth = growthData as any
-  } catch (error) {
-    console.warn("Growth data query failed:", error)
-    growth = []
-  }
-
-  // Get recent restaurants
-  const recentRestaurants = await sql`
-    SELECT id, name, slug, owner_email, created_at
-    FROM restaurants
-    ORDER BY created_at DESC
-    LIMIT 5
-  `
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard Administrativo</h1>
-        <p className="text-muted-foreground">
-          Visão geral da plataforma Cardápio Digital
-        </p>
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+      {/* Header Section - Mobile First */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard Administrativo</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Visão geral da plataforma Cardápio Digital
+          </p>
+        </div>
+        <div className="flex items-center gap-2 sm:gap-3 self-start sm:self-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.reload()}
+            className="gap-2 text-xs sm:text-sm"
+          >
+            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Atualizar</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Restaurantes</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+      {/* Key Metrics Grid - Mobile First */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Users Card */}
+        <Card className="relative overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium truncate">Total de Usuários</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total_restaurants}</div>
-            <p className="text-xs text-muted-foreground">
-              Restaurantes cadastrados
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Novos (30 dias)</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.new_restaurants_30d}</div>
-            <p className="text-xs text-muted-foreground">
-              +{stats.new_restaurants_7d} na última semana
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Receita (30 dias)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">R$ {(revenue.total_revenue / 100).toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              {revenue.successful_payments} pagamentos confirmados
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Taxa de Crescimento</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.total_restaurants > 0
-                ? Math.round((stats.new_restaurants_30d / stats.total_restaurants) * 100)
-                : 0}%
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Crescimento mensal
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Growth Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Crescimento de Restaurantes (30 dias)
-            </CardTitle>
-            <CardDescription>
-              Novos cadastros por dia nos últimos 30 dias
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              Gráficos temporariamente indisponíveis
+          <CardContent className="pt-0">
+            <div className="text-xl sm:text-2xl font-bold">{metrics.userMetrics?.total_users || 0}</div>
+            <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground mt-2">
+              <span className="text-red-500 whitespace-nowrap">
+                {metrics.userMetrics?.blocked_users || 0} bloqueados
+              </span>
+              <span className="hidden sm:inline mx-1">•</span>
+              <span className="text-destructive whitespace-nowrap">
+                {metrics.userMetrics?.banned_users || 0} banidos
+              </span>
             </div>
           </CardContent>
         </Card>
 
-        {/* Plans Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="h-5 w-5" />
-              Distribuição de Planos
-            </CardTitle>
-            <CardDescription>
-              Assinaturas ativas por plano
-            </CardDescription>
+        {/* Restaurants Card */}
+        <Card className="relative overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium truncate">Restaurantes</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            {/* Charts are rendered in the first card */}
+          <CardContent className="pt-0">
+            <div className="text-xl sm:text-2xl font-bold">{metrics.restaurantMetrics?.total_restaurants || 0}</div>
+            <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground mt-2">
+              <span className="text-yellow-600 whitespace-nowrap">
+                {metrics.restaurantMetrics?.blocked_restaurants || 0} bloqueados
+              </span>
+              <span className="hidden sm:inline mx-1">•</span>
+              <span className="text-green-600 whitespace-nowrap">
+                {((metrics.restaurantMetrics?.total_restaurants || 0) - (metrics.restaurantMetrics?.blocked_restaurants || 0) - (metrics.restaurantMetrics?.banned_restaurants || 0))} ativos
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Revenue Card */}
+        <Card className="relative overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium truncate">Receita Total</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-lg sm:text-xl font-bold truncate">
+              R$ {((metrics.paymentMetrics?.total_revenue || 0) / 100).toFixed(2)}
+            </div>
+            <div className="flex items-center text-xs text-muted-foreground mt-2">
+              <ArrowUpRight className="h-3 w-3 text-green-500 mr-1 flex-shrink-0" />
+              <span className="text-green-600 truncate">
+                {metrics.paymentMetrics?.total_payments || 0} transações
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Growth Card */}
+        <Card className="relative overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium truncate">Taxa de Crescimento</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">
+              +{((metrics.userMetrics?.new_users_30d || 0) / Math.max(metrics.userMetrics?.total_users || 1, 1) * 100).toFixed(1)}%
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 truncate">
+              Novos usuários (30 dias)
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Restaurants */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Restaurantes Recentes</CardTitle>
-          <CardDescription>
-            Últimos restaurantes cadastrados na plataforma
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentRestaurants.map((restaurant: any) => (
-              <div key={restaurant.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <p className="font-medium">{restaurant.name}</p>
-                  <p className="text-sm text-muted-foreground">{restaurant.owner_email}</p>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {restaurant.slug}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(restaurant.created_at).toLocaleDateString('pt-BR')}
-                    </span>
-                  </div>
+      {/* Quick Actions Grid - Mobile First */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer border-2 hover:border-blue-200">
+          <CardContent className="p-4 sm:p-6">
+            <Link href="/admin/restaurants" className="block">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors flex-shrink-0">
+                  <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={`/menu/${restaurant.slug}`} target="_blank" rel="noopener noreferrer">
-                      <Eye className="h-4 w-4 mr-1" />
-                      Ver Menu
-                    </a>
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Editar
-                  </Button>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-base sm:text-lg truncate">Gerenciar Restaurantes</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                    Aprovar, bloquear ou editar restaurantes
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </Link>
+          </CardContent>
+        </Card>
 
-      {/* Revenue and Payments Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Faturamento e Pagamentos
-          </CardTitle>
-          <CardDescription>
-            Visão geral das receitas e status dos pagamentos
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Receita Total (30 dias)</p>
-              <p className="text-2xl font-bold">R$ {(revenue.total_revenue / 100).toFixed(2)}</p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Pagamentos Confirmados</p>
-              <p className="text-2xl font-bold text-green-600">{revenue.successful_payments}</p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Pagamentos Pendentes</p>
-              <p className="text-2xl font-bold text-yellow-600">{revenue.pending_payments}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Plans Management Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestão de Planos</CardTitle>
-          <CardDescription>
-            Controle dos planos de assinatura e suas assinaturas ativas
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {plans.map((plan: any) => (
-              <div key={plan.plan_name} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <p className="font-medium">{plan.plan_name}</p>
-                  <p className="text-sm text-muted-foreground">{plan.subscription_count} assinaturas ativas</p>
+        <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer border-2 hover:border-green-200">
+          <CardContent className="p-4 sm:p-6">
+            <Link href="/admin/users" className="block">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 bg-green-50 rounded-lg group-hover:bg-green-100 transition-colors flex-shrink-0">
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                 </div>
-                <Badge variant={plan.subscription_count > 0 ? "default" : "secondary"}>
-                  {plan.subscription_count > 0 ? "Ativo" : "Inativo"}
-                </Badge>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-base sm:text-lg truncate">Gerenciar Usuários</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                    Administrar contas e permissões
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </Link>
+          </CardContent>
+        </Card>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ações Rápidas</CardTitle>
-          <CardDescription>
-            Ferramentas administrativas para gestão da plataforma
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Button variant="outline" className="h-20 flex-col gap-2">
-              <Building2 className="h-6 w-6" />
-              <span>Gerenciar Restaurantes</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
-              <Users className="h-6 w-6" />
-              <span>Usuários da Plataforma</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
-              <DollarSign className="h-6 w-6" />
-              <span>Relatórios Financeiros</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer border-2 hover:border-purple-200">
+          <CardContent className="p-4 sm:p-6">
+            <Link href="/admin/reports" className="block">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors flex-shrink-0">
+                  <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-base sm:text-lg truncate">Relatórios Financeiros</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                    Análise detalhada de receita e performance
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer border-2 hover:border-red-200">
+          <CardContent className="p-4 sm:p-6">
+            <Link href="/admin/moderation" className="block">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 bg-red-50 rounded-lg group-hover:bg-red-100 transition-colors flex-shrink-0">
+                  <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-base sm:text-lg truncate">Centro de Moderação</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                    Revisar e moderar conteúdo
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer border-2 hover:border-orange-200">
+          <CardContent className="p-4 sm:p-6">
+            <Link href="/admin/plans" className="block">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 bg-orange-50 rounded-lg group-hover:bg-orange-100 transition-colors flex-shrink-0">
+                  <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-base sm:text-lg truncate">Configurar Planos</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                    Gerenciar assinaturas e preços
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer border-2 hover:border-gray-200">
+          <CardContent className="p-4 sm:p-6">
+            <Link href="/dashboard" className="block">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 bg-gray-50 rounded-lg group-hover:bg-gray-100 transition-colors flex-shrink-0">
+                  <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-base sm:text-lg truncate">Dashboard Restaurante</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                    Acessar painel de restaurante
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

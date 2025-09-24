@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth"
-import { Category, MenuItemWithCategory, sql } from "@/lib/db"
+import { Category, MenuItem, sql } from "@/lib/db"
 import { getCurrentPlan, getMaxImagesLimit } from "@/lib/plan-limits"
 import { MenuItemsTable } from "@/components/menu-items-table"
 import { MenuItemForm } from "@/components/menu-item-form"
@@ -22,15 +22,17 @@ export default async function MenuItemsPage() {
 
   if (!restaurant) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Cardápio</h1>
-          <p className="text-muted-foreground">Gerencie os itens do seu cardápio</p>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Cardápio</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Gerencie os itens do seu cardápio</p>
         </div>
         <Card>
-          <CardHeader>
-            <CardTitle>Restaurante não encontrado</CardTitle>
-            <CardDescription>Você precisa cadastrar um restaurante primeiro</CardDescription>
+          <CardHeader className="pb-4 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl">Restaurante não encontrado</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
+              Você precisa cadastrar um restaurante primeiro
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -50,50 +52,56 @@ export default async function MenuItemsPage() {
       ORDER BY display_order ASC
     ` as unknown as Promise<Category[]>,
     sql`
-      SELECT m.*, c.name as category_name 
+      SELECT m.*, c.name as category_name
       FROM menu_items m
       LEFT JOIN categories c ON m.category_id = c.id
       WHERE m.restaurant_id = ${restaurant.id}
       ORDER BY c.display_order ASC, m.display_order ASC, m.created_at DESC
-    ` as unknown as Promise<MenuItemWithCategory[]>,
+    ` as unknown as Promise<MenuItem[]>,
   ])
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Cardápio</h1>
-        <p className="text-muted-foreground">Gerencie os itens do seu cardápio</p>
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Cardápio</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Gerencie os itens do seu cardápio</p>
       </div>
 
       <Tabs defaultValue="list" className="w-full">
-        <TabsList>
-          <TabsTrigger value="list">Lista de Itens</TabsTrigger>
-          <TabsTrigger value="add">Adicionar Item</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="list" className="text-xs sm:text-sm">Lista de Itens</TabsTrigger>
+          <TabsTrigger value="add" className="text-xs sm:text-sm">Adicionar Item</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="list">
+        <TabsContent value="list" className="mt-4 sm:mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Seus Itens do Cardápio</CardTitle>
-              <CardDescription>Gerencie os pratos do seu restaurante</CardDescription>
+            <CardHeader className="pb-4 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl">Seus Itens do Cardápio</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Gerencie os pratos do seu restaurante
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <MenuItemsTable menuItems={menuItems} categories={categories} restaurantId={restaurant.id} />
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="add">
+        <TabsContent value="add" className="mt-4 sm:mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Novo Item do Cardápio</CardTitle>
-              <CardDescription>Adicione um novo prato ao seu cardápio</CardDescription>
+            <CardHeader className="pb-4 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl">Novo Item do Cardápio</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Adicione um novo prato ao seu cardápio
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {categories.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">Você precisa criar pelo menos uma categoria primeiro.</p>
-                  <p className="text-sm text-muted-foreground">
+                <div className="text-center py-6 sm:py-8">
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Você precisa criar pelo menos uma categoria primeiro.
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                     Vá para a seção "Categorias" para criar suas primeiras categorias.
                   </p>
                 </div>

@@ -4,6 +4,57 @@ import { relations } from "drizzle-orm"
 // NOTE: Existing tables (users, restaurants, categories, menu_items) are managed via SQL scripts
 // Only new analytical and billing tables are managed by Drizzle ORM
 
+// Existing tables with moderation fields added
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name"),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  rawJson: jsonb("raw_json"),
+  // Moderation fields
+  isBlocked: boolean("is_blocked").default(false),
+  blockedAt: timestamp("blocked_at", { withTimezone: true }),
+  blockedBy: uuid("blocked_by"),
+  blockedReason: text("blocked_reason"),
+  isBanned: boolean("is_banned").default(false),
+  bannedAt: timestamp("banned_at", { withTimezone: true }),
+  bannedBy: uuid("banned_by"),
+  bannedReason: text("banned_reason"),
+}, (table) => ({
+  emailIdx: index("users_email_idx").on(table.email),
+  blockedIdx: index("users_is_blocked_idx").on(table.isBlocked),
+  bannedIdx: index("users_is_banned_idx").on(table.isBanned),
+}))
+
+export const restaurants = pgTable("restaurants", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description"),
+  slug: text("slug").notNull().unique(),
+  ownerEmail: text("owner_email").notNull(),
+  logoUrl: text("logo_url"),
+  menuDisplayMode: text("menu_display_mode").default("grid").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  // Moderation fields
+  isBlocked: boolean("is_blocked").default(false),
+  blockedAt: timestamp("blocked_at", { withTimezone: true }),
+  blockedBy: uuid("blocked_by"),
+  blockedReason: text("blocked_reason"),
+  isBanned: boolean("is_banned").default(false),
+  bannedAt: timestamp("banned_at", { withTimezone: true }),
+  bannedBy: uuid("banned_by"),
+  bannedReason: text("banned_reason"),
+}, (table) => ({
+  slugIdx: index("restaurants_slug_idx").on(table.slug),
+  ownerEmailIdx: index("restaurants_owner_email_idx").on(table.ownerEmail),
+  blockedIdx: index("restaurants_is_blocked_idx").on(table.isBlocked),
+  bannedIdx: index("restaurants_is_banned_idx").on(table.isBanned),
+}))
+
 // Plans table - NEW TABLE
 export const plans = pgTable("plans", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -129,6 +180,23 @@ export const platformMetrics = pgTable("platform_metrics", {
   metricKeyIdx: index("platform_metrics_key_idx").on(table.metricKey),
 }))
 
+// Audit logs table - NEW TABLE
+export const auditLogs = pgTable("audit_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  action: text("action").notNull(),
+  entityType: text("entity_type").notNull(),
+  entityId: uuid("entity_id").notNull(),
+  performedBy: uuid("performed_by").notNull(),
+  performedAt: timestamp("performed_at", { withTimezone: true }).defaultNow().notNull(),
+  details: jsonb("details"),
+  ipAddress: inet("ip_address"),
+  userAgent: text("user_agent"),
+}, (table) => ({
+  entityIdx: index("audit_logs_entity_idx").on(table.entityType, table.entityId),
+  performedByIdx: index("audit_logs_performed_by_idx").on(table.performedBy),
+  performedAtIdx: index("audit_logs_performed_at_idx").on(table.performedAt),
+}))
+
 // Relations (only for new tables)
 export const platformUsersRelations = relations(platformUsers, ({}) => ({
   // No relations for now
@@ -166,3 +234,6 @@ export type NewPayment = typeof payments.$inferInsert
 
 export type UsageMetric = typeof usageMetrics.$inferSelect
 export type NewUsageMetric = typeof usageMetrics.$inferInsert
+
+export type AuditLog = typeof auditLogs.$inferSelect
+export type NewAuditLog = typeof auditLogs.$inferInsert

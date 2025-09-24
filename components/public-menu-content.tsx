@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, memo } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChefHat, ImageIcon, Grid3X3, List } from "lucide-react"
+import { ChefHat, ImageIcon, Grid3X3, List, Eye } from "lucide-react"
 import { ItemDetailModal } from "@/components/item-detail-modal"
 import type { Restaurant, Category, MenuItem } from "@/lib/db"
 
