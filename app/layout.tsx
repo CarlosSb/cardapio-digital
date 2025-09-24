@@ -7,7 +7,8 @@ import "./globals.css"
 export const metadata: Metadata = {
   title: "Cardápio Digital",
   description: "Sistema de cardápio digital com QR Code",
-  generator: "v0.app",
+  generator: "Antônio Gomes",
+  icons: "/digital-menu-logo.svg",
 }
 
 export default function RootLayout({

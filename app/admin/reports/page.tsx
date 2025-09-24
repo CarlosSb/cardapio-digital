@@ -442,7 +442,7 @@ export default function ReportsPage() {
         </TabsContent>
 
         <TabsContent value="restaurants" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Distribuição de Planos</CardTitle>
@@ -499,7 +499,7 @@ export default function ReportsPage() {
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Status dos Pagamentos</CardTitle>
