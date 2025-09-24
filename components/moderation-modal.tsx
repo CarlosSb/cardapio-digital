@@ -249,7 +249,7 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden z-[9999]">
+        <DialogContent className="w-full max-w-7xl max-h-[95vh] overflow-hidden z-[9999] mx-4">
           <DialogHeader className="relative">
             <DialogTitle className="flex items-center gap-2 pr-8">
               <Shield className="h-5 w-5" />
@@ -363,7 +363,7 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="users" className="max-h-96 overflow-y-auto">
+            <TabsContent value="users" className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               <div className="space-y-2">
                 {paginatedUsers.map((user) => (
                   <Card key={user.id}>
@@ -428,7 +428,7 @@ export function ModerationModal({ isOpen, onClose }: ModerationModalProps) {
               )}
             </TabsContent>
 
-            <TabsContent value="restaurants" className="max-h-96 overflow-y-auto">
+            <TabsContent value="restaurants" className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               <div className="space-y-2">
                 {paginatedRestaurants.map((restaurant) => (
                   <Card key={restaurant.id}>

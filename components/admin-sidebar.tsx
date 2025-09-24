@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Building2, Home, Menu, Tags, QrCode, LogOut, ChefHat, Crown, Shield, Settings } from "lucide-react"
+import { Building2, Users, BarChart3, Settings, Shield, DollarSign, PieChart, Activity, LogOut, ChefHat } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -17,58 +16,41 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 
-const menuItems = [
+const adminMenuItems = [
   {
-    title: "Início",
-    icon: Home,
-    url: "/dashboard",
+    title: "Dashboard",
+    icon: BarChart3,
+    url: "/admin",
   },
   {
-    title: "Restaurante",
-    url: "/dashboard/restaurant",
+    title: "Restaurantes",
     icon: Building2,
+    url: "/admin/restaurants",
+  },
+  {
+    title: "Usuários",
+    icon: Users,
+    url: "/admin/users",
   },
   {
     title: "Planos",
-    url: "/dashboard/plans",
-    icon: Crown,
+    icon: PieChart,
+    url: "/admin/plans",
   },
   {
-    title: "Categorias",
-    url: "/dashboard/categories",
-    icon: Tags,
+    title: "Relatórios",
+    icon: DollarSign,
+    url: "/admin/reports",
   },
   {
-    title: "Cardápio",
-    url: "/dashboard/menu-items",
-    icon: Menu,
-  },
-  {
-    title: "QR Code",
-    url: "/dashboard/qr-code",
-    icon: QrCode,
+    title: "Moderação",
+    icon: Shield,
+    url: "/admin/moderation",
   },
 ]
 
-export function DashboardSidebar() {
+export function AdminSidebar() {
   const pathname = usePathname()
-  const [isAdmin, setIsAdmin] = useState(false)
-
-  useEffect(() => {
-    // Check if user is admin
-    const checkAdminStatus = async () => {
-      try {
-        const response = await fetch('/api/admin/stats')
-        if (response.ok) {
-          setIsAdmin(true)
-        }
-      } catch (error) {
-        // User is not admin
-        setIsAdmin(false)
-      }
-    }
-    checkAdminStatus()
-  }, [])
 
   const handleSignOut = async () => {
     await fetch("/api/auth/signout", { method: "POST" })
@@ -79,9 +61,9 @@ export function DashboardSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
-          <ChefHat className="h-6 w-6 text-sidebar-primary" />
+          <Shield className="h-6 w-6 text-sidebar-primary" />
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold text-sidebar-foreground">Cardápio Digital</span>
+            <span className="truncate font-semibold text-sidebar-foreground">Admin</span>
             <span className="truncate text-xs text-sidebar-foreground/70">Painel Administrativo</span>
           </div>
         </div>
@@ -91,9 +73,9 @@ export function DashboardSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Navegação</SidebarGroupLabel>
           <SidebarMenu>
-            {menuItems.map((item) => (
+            {adminMenuItems.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                <SidebarMenuButton asChild isActive={pathname === item.url}>
                   <Link href={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
@@ -107,16 +89,14 @@ export function DashboardSidebar() {
 
       <SidebarFooter>
         <SidebarMenu>
-          {isAdmin && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Painel Admin">
-                <Link href="/admin" prefetch={false}>
-                  <Shield />
-                  <span>Admin</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Meus Restaurantes">
+              <Link href="/dashboard" prefetch={false}>
+                <ChefHat />
+                <span>Meus Restaurantes</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleSignOut} tooltip="Sair">
               <LogOut />

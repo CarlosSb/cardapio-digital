@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Eye, Edit, ExternalLink, Building2, Calendar, AlertTriangle } from "lucide-react"
+import { Eye, Edit, ExternalLink, Building2, Calendar, AlertTriangle, Settings } from "lucide-react"
 import type { Restaurant } from "@/lib/db"
 
 interface UserRestaurantsModalProps {
@@ -39,18 +39,23 @@ export function UserRestaurantsModal({
   const loadUserRestaurants = async () => {
     if (!user) return
 
+    console.log('🔍 Loading restaurants for user:', user.email)
     setLoading(true)
     try {
       const response = await fetch(`/api/restaurants?owner_email=${encodeURIComponent(user.email)}`)
+      console.log('📡 API Response status:', response.status)
+
       if (response.ok) {
         const data = await response.json()
+        console.log('✅ API Response data:', data)
         setRestaurants(data.restaurants || [])
       } else {
-        console.error('Failed to load user restaurants')
+        const errorText = await response.text()
+        console.error('❌ Failed to load user restaurants:', response.status, errorText)
         setRestaurants([])
       }
     } catch (error) {
-      console.error('Error loading user restaurants:', error)
+      console.error('💥 Error loading user restaurants:', error)
       setRestaurants([])
     } finally {
       setLoading(false)
@@ -77,7 +82,7 @@ export function UserRestaurantsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[70vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
@@ -97,94 +102,97 @@ export function UserRestaurantsModal({
           ) : restaurants.length === 0 ? (
             <div className="text-center py-8">
               <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Nenhum restaurante encontrado para este usuário.</p>
+              <p className="text-muted-foreground mb-2">Nenhum restaurante encontrado para este usuário.</p>
+              <p className="text-xs text-muted-foreground">
+                Email do usuário: <code className="bg-muted px-1 py-0.5 rounded">{user?.email}</code>
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Verifique se o usuário possui restaurantes cadastrados.
+              </p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
               {restaurants.map((restaurant) => (
                 <Card key={restaurant.id} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      {/* Header */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg truncate">{restaurant.name}</h3>
-                          {restaurant.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                              {restaurant.description}
-                            </p>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-4">
+                      {/* Restaurant Image */}
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                          {restaurant.logo_url ? (
+                            <img
+                              src={restaurant.logo_url}
+                              alt={restaurant.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Building2 className="w-6 h-6 text-muted-foreground" />
                           )}
                         </div>
-                        {getStatusBadge(restaurant)}
                       </div>
 
-                      {/* Info */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span className="font-medium">Slug:</span>
-                          <code className="bg-muted px-1 py-0.5 rounded text-xs">
-                            {restaurant.slug}
-                          </code>
-                        </div>
+                      {/* Restaurant Info - Compact */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            {/* Name with truncation */}
+                            <h3 className="font-semibold text-base truncate" title={restaurant.name}>
+                              {restaurant.name}
+                            </h3>
 
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          <span>Criado em {formatDate(restaurant.created_at)}</span>
-                        </div>
+                            {/* Slug with truncation */}
+                            <p className="text-sm text-muted-foreground truncate mt-1" title={restaurant.slug}>
+                              <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
+                                {restaurant.slug}
+                              </code>
+                            </p>
+                          </div>
 
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Modo:</span>
-                          <Badge variant="outline" className="text-xs">
-                            {restaurant.menu_display_mode === 'grid' ? 'Grade' : 'Lista'}
-                          </Badge>
+                          {/* Status Badge */}
+                          <div className="flex-shrink-0">
+                            {getStatusBadge(restaurant)}
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-1 ml-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onEditRestaurant?.(restaurant)}
+                              className="h-8 w-8 p-0"
+                              title="Editar restaurante"
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              asChild
+                              className="h-8 w-8 p-0"
+                              title="Ver cardápio"
+                            >
+                              <a
+                                href={`/menu/${restaurant.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            </Button>
+                          </div>
                         </div>
                       </div>
-
-                      {/* Actions */}
-                      <div className="flex gap-2 pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onPreviewRestaurant?.(restaurant)}
-                          className="flex-1"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Ver Menu
-                        </Button>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onEditRestaurant?.(restaurant)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                        >
-                          <a
-                            href={`/menu/${restaurant.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      </div>
-
-                      {/* Warning for blocked/banned */}
-                      {((restaurant as any).is_blocked || (restaurant as any).is_banned) && (
-                        <div className="flex items-center gap-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
-                          <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                          <span className="text-xs text-yellow-800">
-                            {(restaurant as any).is_banned ? 'Restaurante banido' : 'Restaurante bloqueado'}
-                          </span>
-                        </div>
-                      )}
                     </div>
+
+                    {/* Warning for blocked/banned - Compact */}
+                    {((restaurant as any).is_blocked || (restaurant as any).is_banned) && (
+                      <div className="flex items-center gap-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md mt-3">
+                        <AlertTriangle className="h-3 w-3 text-yellow-600 flex-shrink-0" />
+                        <span className="text-xs text-yellow-800 truncate">
+                          {(restaurant as any).is_banned ? 'Restaurante banido' : 'Restaurante bloqueado'}
+                        </span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}

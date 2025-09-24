@@ -1,30 +1,34 @@
 "use client"
 
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
+import { LogOut, Building2 } from "lucide-react"
+import Link from "next/link"
 
 export function AdminHeader() {
+  const handleSignOut = async () => {
+    await fetch("/api/auth/signout", { method: "POST" })
+    window.location.href = "/login"
+  }
+
   return (
-    <header className="border-b bg-muted/30 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-          <div className="text-sm text-muted-foreground">
-            Plataforma Cardápio Digital
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          onClick={async () => {
-            await fetch("/api/auth/signout", { method: "POST" })
-            window.location.href = "/login"
-          }}
-          className="flex items-center gap-2"
-        >
-          <LogOut className="h-4 w-4" />
-          Sair
-        </Button>
-      </div>
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+      <SidebarTrigger className="-ml-1" />
+      <Separator orientation="vertical" className="mr-2 h-4" />
+      <Breadcrumb className="flex-1">
+        <BreadcrumbList>
+          <BreadcrumbItem className="hidden md:block">
+            <BreadcrumbLink href="/admin">
+              Painel Administrativo
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Dashboard</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
     </header>
   )
 }
